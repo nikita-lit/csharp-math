@@ -1,0 +1,16 @@
+@model IReadOnlyCollection<FunctionAnalysis>
+@{ ViewData["Title"] = "Salvestatud funktsioonid"; }
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4"><h1 class="h2 mb-0">Salvestatud funktsioonid</h1><a class="btn btn-primary" asp-action="Create">Uus uurimine</a></div>
+@if (Model.Count == 0)
+{
+    <div class="alert alert-info">Ühtegi funktsiooni pole veel salvestatud. <a asp-action="Create" class="alert-link">Ava kalkulaator</a> ja alusta uurimist.</div>
+}
+else
+{
+    <div class="table-responsive"><table class="table table-striped table-hover align-middle"><thead><tr><th>Funktsioon</th><th>Määramispiirkond</th><th>Tuletis</th><th>Salvestatud</th><th>Tegevused</th></tr></thead><tbody>
+    @foreach (var item in Model)
+    {
+        <tr><td><a asp-action="Details" asp-route-id="@item.Id"><span class="math" data-latex="f(x) = @item.FormulaLatex">f(x) = @item.Formula</span></a></td><td>@item.Domain</td><td><span class="math" data-latex="@item.DerivativeLatex">@item.Derivative</span></td><td class="text-nowrap">@item.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td><td class="text-nowrap"><a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@item.Id">Ava</a> <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@item.Id">Muuda</a> <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@item.Id">Kustuta</a></td></tr>
+    }
+    </tbody></table></div>
+}

@@ -1,0 +1,79 @@
+@model FunctionInputModel
+<section class="calculator" aria-label="Funktsiooni kalkulaator">
+    <div asp-validation-summary="ModelOnly" class="text-danger small"></div>
+    <div class="calculator-display-label">
+        <label asp-for="Formula">Funktsioon</label>
+        <div class="calculator-cursor-controls">
+            <button type="button" data-action="left" aria-label="Kursor vasakule" title="Kursor vasakule">←</button>
+            <button type="button" data-action="right" aria-label="Kursor paremale" title="Kursor paremale">→</button>
+        </div>
+    </div>
+    <div class="calculator-screen">
+        <span class="calculator-prefix">f(x) =</span>
+        <input asp-for="Formula" class="calculator-display" readonly inputmode="none" autocomplete="off" spellcheck="false" maxlength="200" aria-describedby="calculatorHint" placeholder="0" />
+    </div>
+    <span asp-validation-for="Formula" class="text-danger small"></span>
+    <div class="calculator-error text-danger small" role="alert" hidden></div>
+    <span class="calculator-position visually-hidden" aria-live="polite"></span>
+
+    <div class="calculator-common-functions" aria-label="Põhifunktsioonid">
+        <button type="button" class="calculator-key function-key" data-insert="^2">x²</button>
+        <button type="button" class="calculator-key function-key" data-template="^()" data-offset="2">xʸ</button>
+        <button type="button" class="calculator-key function-key" data-function="sqrt">√</button>
+        <button type="button" class="calculator-key function-key" data-function="ln">ln</button>
+        <button type="button" class="calculator-key function-key" data-function="sin">sin</button>
+        <button type="button" class="calculator-key function-key" data-function="cos">cos</button>
+        <button type="button" class="calculator-key function-key" data-function="tan">tan</button>
+        <button type="button" class="calculator-key function-key" data-insert="pi">π</button>
+    </div>
+    <div class="calculator-keys" aria-label="Arvud ja tehted">
+        <button type="button" class="calculator-key clear-key" data-action="clear" aria-label="Puhasta valem">AC</button>
+        <button type="button" class="calculator-key utility-key" data-insert="(">(</button>
+        <button type="button" class="calculator-key utility-key" data-insert=")">)</button>
+        <button type="button" class="calculator-key utility-key" data-action="backspace" aria-label="Kustuta eelmine märk">⌫</button>
+        <button type="button" class="calculator-key number-key" data-insert="7">7</button>
+        <button type="button" class="calculator-key number-key" data-insert="8">8</button>
+        <button type="button" class="calculator-key number-key" data-insert="9">9</button>
+        <button type="button" class="calculator-key operator-key" data-insert="/">÷</button>
+        <button type="button" class="calculator-key number-key" data-insert="4">4</button>
+        <button type="button" class="calculator-key number-key" data-insert="5">5</button>
+        <button type="button" class="calculator-key number-key" data-insert="6">6</button>
+        <button type="button" class="calculator-key operator-key" data-insert="*">×</button>
+        <button type="button" class="calculator-key number-key" data-insert="1">1</button>
+        <button type="button" class="calculator-key number-key" data-insert="2">2</button>
+        <button type="button" class="calculator-key number-key" data-insert="3">3</button>
+        <button type="button" class="calculator-key operator-key" data-insert="-">−</button>
+        <button type="button" class="calculator-key number-key" data-insert="0">0</button>
+        <button type="button" class="calculator-key number-key" data-insert=".">.</button>
+        <button type="button" class="calculator-key variable-key" data-insert="x">x</button>
+        <button type="button" class="calculator-key operator-key" data-insert="+">+</button>
+    </div>
+    <button type="button" class="calculator-equals" data-action="analyze"><span>=</span> Arvuta</button>
+
+    <details class="calculator-advanced">
+        <summary>Veel funktsioone</summary>
+        <div class="calculator-function-group"><span>Astmed ja juured</span><div><button type="button" class="calculator-key function-key" data-insert="^3">x³</button><button type="button" class="calculator-key function-key" data-function="cbrt">∛</button><button type="button" class="calculator-key function-key" data-function="exp">exp</button><button type="button" class="calculator-key function-key" data-insert="e">e</button></div></div>
+        <div class="calculator-function-group"><span>Logaritmid ja trigonomeetria</span><div>@foreach (var name in new[] { "log", "cot", "arcsin", "arccos", "arctan", "sinh", "cosh", "tanh" }) { <button type="button" class="calculator-key function-key" data-function="@name">@name</button> }</div></div>
+    </details>
+    <div class="calculator-settings">
+        <div class="calculator-range">
+            <div><label asp-for="RangeFrom">x alates</label><input asp-for="RangeFrom" class="form-control form-control-sm" type="number" step="any" min="-1000" max="1000" /><span asp-validation-for="RangeFrom" class="text-danger small"></span></div>
+            <div><label asp-for="RangeTo">x kuni</label><input asp-for="RangeTo" class="form-control form-control-sm" type="number" step="any" min="-1000" max="1000" /><span asp-validation-for="RangeTo" class="text-danger small"></span></div>
+        </div>
+        <button type="submit" class="btn btn-outline-primary w-100 save-button">@(Model.Id.HasValue ? "Salvesta muudatused" : "Salvesta uurimine")</button>
+    </div>
+    <details class="calculator-examples">
+        <summary>Näited ja abi</summary>
+        <label for="calculatorExample" class="visually-hidden">Näidisfunktsioon</label>
+        <select id="calculatorExample" class="form-select form-select-sm">
+            <option value="">Vali näidisfunktsioon…</option>
+            <option value="x^3 - 3x">x³ − 3x</option>
+            <option value="x^4 - 2x^2">x⁴ − 2x²</option>
+            <option value="1/(x - 2)">1 / (x − 2)</option>
+            <option value="sqrt(4 - x^2)">√(4 − x²)</option>
+            <option value="x*e^(-x)">x · e⁻ˣ</option>
+            <option value="sin(x)">sin(x)</option>
+        </select>
+        <p id="calculatorHint">Koosta valem nuppudega. Klõpsa valemis või kasuta nooli, et seda parandada. Graafik ja omadused uuenevad automaatselt.</p>
+    </details>
+</section>

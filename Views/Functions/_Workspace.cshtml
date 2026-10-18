@@ -1,0 +1,6 @@
+@model FunctionAnalysis
+<div class="workspace" data-formula="@Model.Formula" data-from="@Model.RangeFrom" data-to="@Model.RangeTo" data-preview="@(Model.Id == 0 ? "true" : "false")">
+    <div class="workspace-status" role="status" aria-live="polite"></div>
+    <div class="workspace-grid"><partial name="_FunctionGraph" model="Model.Formula" /><section class="panel results-panel"><div class="panel-heading"><div><span class="eyebrow">FUNKTSIOONI OMADUSED</span><h2>Tulemused</h2></div><span class="tag preview-tag">@(Model.Id == 0 ? "Eelvaade" : "Salvestatud")</span></div><partial name="_AnalysisTable" model="Model" /><p class="analysis-note">@(Model.IsNumerical ? "Osa tulemusi on leitud numbriliselt valitud vahemikus." : Model.Id == 0 ? "Sisesta valem ja uuri selle omadusi." : "Algebralised tulemused kehtivad kogu määramispiirkonnas.")</p><button class="button secondary solution-toggle" type="button" aria-expanded="false">Näita lahenduskäiku <span>↓</span></button></section></div>
+    <section class="panel solution-panel" hidden><div class="panel-heading"><div><span class="eyebrow">SAMM-SAMMULT</span><h2>Lahenduskäik</h2></div><button class="button quiet solution-close" type="button">Sulge ×</button></div><div class="solution-content" aria-live="polite"></div></section>
+</div>
