@@ -76,7 +76,7 @@ public static class DomainAnalyzer
         return (new IntervalSet(intervals), complete);
     }
 
-    public static (IntervalSet positive, IntervalSet negativeRegions) SignRegions(Func<double, double> g, IntervalSet domain, IEnumerable<double> breakpoints, bool merge, IEnumerable<double>? preventMergeAt = null)
+    public static (IntervalSet positive, IntervalSet negativeRegions) SignRegions(Func<double, double> g, IntervalSet domain, IEnumerable<double> breakpoints, bool merge, IEnumerable<double>? preventMergeAt = null, bool includeEndpoints = false)
     {
         var points = SortedUnique(breakpoints);
         var separators = SortedUnique(preventMergeAt ?? []);
@@ -105,12 +105,14 @@ public static class DomainAnalyzer
                     parts.Add((boundaries[i], boundaries[i + 1], sign));
             }
 
+            bool Included(double x, bool positiveSign) => includeEndpoints && double.IsFinite(x) && domain.Contains(x)
+                && !points.Any(p => Math.Abs(p - x) <= IntervalSet.Tolerance) && (positiveSign ? g(x) > 0 : g(x) < 0);
             foreach (var (u, v, sign) in parts)
             {
                 if (sign > 0)
-                    positive.Add(new Interval(u, v, false, false));
+                    positive.Add(new Interval(u, v, Included(u, true), Included(v, true)));
                 else if (sign < 0)
-                    negativeRegions.Add(new Interval(u, v, false, false));
+                    negativeRegions.Add(new Interval(u, v, Included(u, false), Included(v, false)));
             }
         }
 

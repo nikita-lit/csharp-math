@@ -99,37 +99,6 @@ public static class ExpressionEvaluator
             return x => Math.Sin(a(x));
         if (f.IsCos)
             return x => Math.Cos(a(x));
-        if (f.IsTan)
-            return x =>
-            {
-                var u = a(x);
-                return Math.Abs(Math.Cos(u)) < 1e-15 ? double.NaN : Math.Tan(u);
-            };
-        if (f.IsCot)
-            return x =>
-            {
-                var u = a(x);
-                var s = Math.Sin(u);
-                return Math.Abs(s) < 1e-15 ? double.NaN : Math.Cos(u) / s;
-            };
-        if (f.IsSec)
-            return x => 1 / Math.Cos(a(x));
-        if (f.IsCsc)
-            return x => 1 / Math.Sin(a(x));
-        if (f.IsAsin)
-            return x => Math.Asin(a(x));
-        if (f.IsAcos)
-            return x => Math.Acos(a(x));
-        if (f.IsAtan)
-            return x => Math.Atan(a(x));
-        if (f.IsAcot)
-            return x => Math.PI / 2 - Math.Atan(a(x));
-        if (f.IsSinh)
-            return x => Math.Sinh(a(x));
-        if (f.IsCosh)
-            return x => Math.Cosh(a(x));
-        if (f.IsTanh)
-            return x => Math.Tanh(a(x));
         if (f.IsExp)
             return x => Math.Exp(a(x));
         if (f.IsLn)
@@ -138,14 +107,6 @@ public static class ExpressionEvaluator
                 var u = a(x);
                 return u > 0 ? Math.Log(u) : double.NaN;
             };
-        if (f.IsLg)
-            return x =>
-            {
-                var u = a(x);
-                return u > 0 ? Math.Log10(u) : double.NaN;
-            };
-        if (f.IsAbs)
-            return x => Math.Abs(a(x));
         return _ => double.NaN;
     }
 }

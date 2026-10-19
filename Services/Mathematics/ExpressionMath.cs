@@ -44,6 +44,37 @@ public static class ExpressionMath
         Expression.Power { Item2: Expression.Number n } p => IsInteger(n.Item) && IsRationalFunction(p.Item1),
         _ => !ContainsVariable(e)
     };
+    public static bool IsPolynomial(Expression e) => e switch
+    {
+        Expression.Sum s => s.Item.All(IsPolynomial),
+        Expression.Product p => p.Item.All(IsPolynomial),
+        Expression.Power { Item2: Expression.Number n } p => IsInteger(n.Item) && !IsNegative(n.Item) && IsPolynomial(p.Item1),
+        _ => !ContainsVariable(e) || e.Equals(X)
+    };
+
+    // MathNet does not expand exponents when cancelling e^u/e^u. Normalize them
+    // explicitly so factoring derivatives cannot repeatedly rediscover the same factor.
+    public static Expression NormalizePowers(Expression e, bool reflect = false) => e switch
+    {
+        Expression.Identifier => reflect ? Operators.negate(X) : e,
+        Expression.Sum s => s.Item.Select(t => NormalizePowers(t, reflect)).Aggregate(Expression.Zero, Operators.add),
+        Expression.Product p => p.Item.Select(t => NormalizePowers(t, reflect)).Aggregate(Expression.One, Operators.multiply),
+        Expression.Power p => Operators.pow(NormalizePowers(p.Item1, reflect), Sym(NormalizePowers(p.Item2, reflect)).Expand().Expression),
+        Expression.Function f => NormalizeFunction(f.Item1, IsPolynomial(f.Item2) ? Sym(NormalizePowers(f.Item2, reflect)).Expand().Expression : NormalizePowers(f.Item2, reflect)),
+        _ => e
+    };
+
+    private static Expression NormalizeFunction(Function function, Expression argument)
+    {
+        if ((function.IsSin || function.IsCos) && ExpressionFormatter.ToText(argument).StartsWith('-'))
+        {
+            var opposite = Operators.negate(argument);
+            if (IsPolynomial(opposite)) opposite = Sym(opposite).Expand().Expression;
+            var value = Operators.apply(function, opposite);
+            return function.IsSin ? Operators.negate(value) : value;
+        }
+        return Operators.apply(function, argument);
+    }
     public static Expression Simplify(Expression e)
     {
         var sym = Sym(e);

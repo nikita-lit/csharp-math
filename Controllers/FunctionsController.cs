@@ -28,11 +28,11 @@ public class FunctionsController(AppDbContext context, FunctionAnalyzer analyzer
     }
 
     // GET: /Functions/Create
-    public IActionResult Create(string? formula, double from = -5, double to = 5) => View(new FunctionInputModel { Formula = formula ?? string.Empty, RangeFrom = from, RangeTo = to });
+    public IActionResult Create(string? formula, double from = -5, double to = 5, bool restrictDomain = false) => View(new FunctionInputModel { Formula = formula ?? string.Empty, RangeFrom = from, RangeTo = to, RestrictDomain = restrictDomain });
     // POST: /Functions/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind(nameof(FunctionInputModel.Formula), nameof(FunctionInputModel.RangeFrom), nameof(FunctionInputModel.RangeTo))] FunctionInputModel input)
+    public async Task<IActionResult> Create([Bind(nameof(FunctionInputModel.Formula), nameof(FunctionInputModel.RangeFrom), nameof(FunctionInputModel.RangeTo), nameof(FunctionInputModel.RestrictDomain))] FunctionInputModel input)
     {
         ValidateFormula(input);
         if (!ModelState.IsValid)
@@ -43,7 +43,7 @@ public class FunctionsController(AppDbContext context, FunctionAnalyzer analyzer
         FunctionAnalysis analysis;
         try
         {
-            analysis = analyzer.Analyze(input.Formula, input.RangeFrom, input.RangeTo);
+            analysis = analyzer.Analyze(input.Formula, input.RangeFrom, input.RangeTo, input.RestrictDomain);
         }
         catch (FormulaException ex)
         {
@@ -70,13 +70,13 @@ public class FunctionsController(AppDbContext context, FunctionAnalyzer analyzer
             return NotFound();
         }
 
-        return View(new FunctionInputModel { Id = analysis.Id, Formula = analysis.Formula, RangeFrom = analysis.RangeFrom, RangeTo = analysis.RangeTo });
+        return View(new FunctionInputModel { Id = analysis.Id, Formula = analysis.Formula, RangeFrom = analysis.RangeFrom, RangeTo = analysis.RangeTo, RestrictDomain = analysis.RestrictDomain });
     }
 
     // POST: /Functions/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind(nameof(FunctionInputModel.Id), nameof(FunctionInputModel.Formula), nameof(FunctionInputModel.RangeFrom), nameof(FunctionInputModel.RangeTo))] FunctionInputModel input)
+    public async Task<IActionResult> Edit(int id, [Bind(nameof(FunctionInputModel.Id), nameof(FunctionInputModel.Formula), nameof(FunctionInputModel.RangeFrom), nameof(FunctionInputModel.RangeTo), nameof(FunctionInputModel.RestrictDomain))] FunctionInputModel input)
     {
         if (id != input.Id)
         {
@@ -99,6 +99,7 @@ public class FunctionsController(AppDbContext context, FunctionAnalyzer analyzer
         analysis.Formula = input.Formula.Trim();
         analysis.RangeFrom = input.RangeFrom;
         analysis.RangeTo = input.RangeTo;
+        analysis.RestrictDomain = input.RestrictDomain;
         try
         {
             analyzer.Fill(analysis);
@@ -142,11 +143,11 @@ public class FunctionsController(AppDbContext context, FunctionAnalyzer analyzer
     }
 
     [HttpGet]
-    public IActionResult Points(string? formula, double from = -5, double to = 5, double step = 0.05) => ComputeResult(() => analyzer.GetPlotData(formula ?? "", from, to, step));
+    public IActionResult Points(string? formula, double from = -5, double to = 5, double step = 0.05, bool restrictDomain = false) => ComputeResult(() => analyzer.GetPlotData(formula ?? "", from, to, step, restrictDomain));
     [HttpGet]
-    public IActionResult Preview(string? formula, double from = -5, double to = 5) => ComputeResult(() => analyzer.Analyze(formula ?? "", from, to));
+    public IActionResult Preview(string? formula, double from = -5, double to = 5, bool restrictDomain = false) => ComputeResult(() => analyzer.Analyze(formula ?? "", from, to, restrictDomain));
     [HttpGet]
-    public IActionResult Solution(string? formula, double from = -5, double to = 5) => ComputeResult(() => analyzer.GetSolution(formula ?? "", from, to));
+    public IActionResult Solution(string? formula, double from = -5, double to = 5, bool restrictDomain = false) => ComputeResult(() => analyzer.GetSolution(formula ?? "", from, to, restrictDomain));
     private IActionResult ComputeResult(Func<object> compute)
     {
         try

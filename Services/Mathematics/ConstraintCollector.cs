@@ -79,14 +79,8 @@ public sealed class ConstraintCollector
 
     public bool ForFunction(Function f, Expression argument)
     {
-        if (f.IsLn || f.IsLg)
+        if (f.IsLn)
             return Add(argument, ConstraintKind.Positive, "logaritmitav > 0");
-        if (f.IsTan || f.IsSec)
-            return Add(Operators.cos(argument), ConstraintKind.NonZero, f.IsTan ? "tan u = sin u / cos u ⇒ cos u ≠ 0" : "sec u = 1 / cos u ⇒ cos u ≠ 0");
-        if (f.IsCot || f.IsCsc)
-            return Add(Operators.sin(argument), ConstraintKind.NonZero, f.IsCot ? "cot u = cos u / sin u ⇒ sin u ≠ 0" : "csc u = 1 / sin u ⇒ sin u ≠ 0");
-        if (f.IsAsin || f.IsAcos)
-            return Add(Operators.subtract(Expression.One, Operators.pow(argument, ExpressionMath.Integer(2))), ConstraintKind.NonNegative, "arcsin/arccos: -1 ≤ u ≤ 1 ⇒ 1 - u² ≥ 0");
         return true;
     }
 

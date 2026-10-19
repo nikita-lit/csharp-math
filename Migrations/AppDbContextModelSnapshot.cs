@@ -23,6 +23,9 @@ namespace csharp_math.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("AnalysisVersion")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Concavity")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -74,6 +77,10 @@ namespace csharp_math.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Parity")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Positivity")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -84,6 +91,9 @@ namespace csharp_math.Migrations
                     b.Property<double>("RangeTo")
                         .HasColumnType("REAL");
 
+                    b.Property<bool>("RestrictDomain")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("SecondDerivative")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -93,6 +103,10 @@ namespace csharp_math.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ValueRange")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Zeros")

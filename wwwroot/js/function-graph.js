@@ -8,23 +8,24 @@
     const graph = workspace.querySelector('.function-graph');
     const canvas = graph.querySelector('canvas');
     const ctx = canvas.getContext('2d');
-    const graphFrom = document.getElementById('graphFrom');
-    const graphTo = document.getElementById('graphTo');
-    const graphStep = document.getElementById('graphStep');
+    const restrictInput = document.getElementById('RestrictDomain');
     const status = workspace.querySelector('.workspace-status');
     const graphError = graph.querySelector('.graph-error');
     const empty = graph.querySelector('.graph-empty');
     const tooltip = graph.querySelector('.graph-tooltip');
     const solutionPanel = workspace.querySelector('.solution-panel');
     const solutionContent = workspace.querySelector('.solution-content');
-    const solutionToggle = workspace.querySelector('.solution-toggle');
+    const saveButton = document.querySelector('.save-button');
+    const calculateButton = document.querySelector('[data-calculate]');
+    const form = document.getElementById('analysisForm');
     let data = null, view = null, geometry = null;
-    let graphAbort, previewAbort, solutionAbort, previewTimer, zoomTimer;
+    let graphAbort, previewAbort, solutionAbort;
     let solutionKey = '', chartVersion = 0, previewVersion = 0, solutionVersion = 0;
-    let width = 0, height = 0, dragging = null;
+    let width = 0, height = 0;
     const current = () => ({ formula: preview ? formulaInput.value.trim() : workspace.dataset.formula,
         from: preview ? Number(inputFrom.value) : Number(workspace.dataset.from),
-        to: preview ? Number(inputTo.value) : Number(workspace.dataset.to) });
+        to: preview ? Number(inputTo.value) : Number(workspace.dataset.to),
+        restrictDomain: preview ? restrictInput.checked : workspace.dataset.restrictDomain === 'true' });
     const params = values => new URLSearchParams(values);
     const number = x => Number.isFinite(x) ? Number(x.toFixed(4)).toString() : '∄';
     const colors = () => {
@@ -43,15 +44,16 @@
     async function loadGraph() {
         graphAbort?.abort();
         const version = ++chartVersion;
-        const formula = current().formula;
+        const values = current();
+        const formula = values.formula;
         if (!formula) { clearGraph(); showGraphError(); return; }
         graphAbort = new AbortController();
         graph.setAttribute('aria-busy', 'true');
         try {
-            const result = await read(`/Functions/Points?${params({ formula, from: graphFrom.value, to: graphTo.value, step: graphStep.value })}`, graphAbort.signal);
+            const result = await read(`/Functions/Points?${params({ ...values, step: Math.max(.0001, (values.to - values.from) / 800) })}`, graphAbort.signal);
             if (version !== chartVersion) return;
             data = result;
-            view = { min: Number(graphFrom.value), max: Number(graphTo.value) };
+            view = { min: values.from, max: values.to };
             empty.hidden = true;
             showGraphError();
             render();
@@ -60,61 +62,69 @@
         } finally { if (version === chartVersion) graph.removeAttribute('aria-busy'); }
     }
     function updateResults(result) {
-        workspace.querySelectorAll('[data-property]').forEach(element => {
-            const key = element.dataset.property;
-            element.textContent = result[key] || '—';
-            const latex = result[`${key}Latex`];
-            if (latex) element.dataset.latex = latex;
-            else delete element.dataset.latex;
-        });
-        renderMath(workspace.querySelector('.analysis-table'));
         workspace.querySelector('.analysis-note').textContent = result.isNumerical
             ? `Osa tulemusi on leitud numbriliselt vahemikus [${result.rangeFrom}; ${result.rangeTo}].`
-            : 'Algebralised tulemused kehtivad kogu määramispiirkonnas.';
+            : 'Tulemused kehtivad näidatud määramispiirkonnas.';
     }
     function clearResults() {
-        workspace.querySelectorAll('[data-property]').forEach(element => { element.textContent = '—'; delete element.dataset.latex; });
+        if (saveButton) saveButton.disabled = true;
         workspace.querySelector('.analysis-note').textContent = 'Sisesta valem ja uuri selle omadusi.';
     }
     function invalidateSolution() {
         solutionKey = '';
         solutionAbort?.abort();
         solutionVersion++;
-        solutionContent.replaceChildren();
+        solutionPanel.removeAttribute('aria-busy');
+        solutionContent.replaceChildren(node('p', 'solution-placeholder', 'Lahenduskäik ilmub pärast funktsiooni arvutamist.'));
     }
     async function loadPreview() {
+        if (!form.reportValidity()) return;
+        if (Number(inputTo.value) - Number(inputFrom.value) < .01) {
+            setStatus('Vahemiku algus peab olema väiksem kui lõpp ja vahemik vähemalt 0.01 pikkune.', true);
+            form.querySelector('.scope-settings').open = true;
+            inputTo.focus();
+            return;
+        }
         previewAbort?.abort(); graphAbort?.abort(); invalidateSolution();
+        clearResults(); clearGraph();
         const version = ++previewVersion;
         const values = current();
-        graphFrom.value = values.from; graphTo.value = values.to;
-        if (!values.formula) { clearResults(); clearGraph(); setStatus(''); return; }
+        if (!values.formula) { setStatus('Sisesta funktsiooni valem.', true); formulaInput.focus(); return; }
         previewAbort = new AbortController();
+        calculateButton.disabled = true;
+        calculateButton.textContent = 'Arvutan…';
         setStatus('Uurin funktsiooni…');
         try {
             const result = await read(`/Functions/Preview?${params(values)}`, previewAbort.signal);
             if (version !== previewVersion) return;
             updateResults(result);
-            setStatus('Arvutus valmis.');
             await loadGraph();
-            if (!solutionPanel.hidden && version === previewVersion) loadSolution();
+            if (version !== previewVersion) return;
+            const complete = await loadSolution();
+            if (version === previewVersion && complete) {
+                saveButton.disabled = false;
+                setStatus('Arvutus valmis.');
+            }
         } catch (error) {
             if (error.name !== 'AbortError' && version === previewVersion) {
                 clearResults(); clearGraph(); setStatus(error.message, true);
                 solutionContent.textContent = error.message;
             }
+        } finally {
+            if (version === previewVersion) {
+                calculateButton.disabled = false;
+                calculateButton.textContent = 'Arvuta';
+            }
         }
     }
-    function schedulePreview() {
+    function invalidatePreview() {
         previewAbort?.abort(); graphAbort?.abort(); solutionAbort?.abort();
         previewVersion++; chartVersion++; solutionVersion++;
         graph.removeAttribute('aria-busy');
-        clearTimeout(previewTimer);
         clearResults(); clearGraph(); invalidateSolution();
-        setStatus(current().formula ? 'Uurin funktsiooni…' : '');
-        previewTimer = setTimeout(loadPreview, 400);
-    }
-    function syncRange() {
-        if (view) { graphFrom.value = Number(view.min.toFixed(4)); graphTo.value = Number(view.max.toFixed(4)); }
+        calculateButton.disabled = false;
+        calculateButton.textContent = 'Arvuta';
+        setStatus(current().formula ? 'Sisend muutus. Vajuta Arvuta, et tulemusi uuendada.' : '');
     }
     function axes(values) {
         const finite = values.filter(v => v != null && Number.isFinite(v)).sort((a,b) => a-b);
@@ -144,10 +154,8 @@
         ctx.fillStyle = palette[5]; ctx.fillRect(0,0,width,height);
         empty.hidden = !!data;
         if (!data || !view) return;
-        const series = [data.y, data.derivativeY, data.secondDerivativeY];
-        const enabled = [...graph.querySelectorAll('[data-series]')].map(input => input.checked);
-        const visible = [];
-        data.x.forEach((x,i) => { if (x >= view.min && x <= view.max) series.forEach((s,j) => { if (enabled[j]) visible.push(s[i]); }); });
+        const series = [data.y];
+        const visible = data.y.filter((y, i) => data.x[i] >= view.min && data.x[i] <= view.max);
         const yr = axes(visible);
         const plot = { left: 53, right: width-17, top: 25, bottom: height-38 };
         const X = x => plot.left + (x-view.min)/(view.max-view.min)*(plot.right-plot.left);
@@ -166,11 +174,7 @@
         });
         ctx.fillStyle=palette[4];ctx.textAlign='right';ctx.fillText('x',plot.right,height-10);ctx.textAlign='left';ctx.fillText('y',12,16);
         ctx.save();ctx.beginPath();ctx.rect(plot.left,plot.top,plot.right-plot.left,plot.bottom-plot.top);ctx.clip();
-        data.asymptotes.forEach(x => {
-            ctx.strokeStyle=palette[4];ctx.lineWidth=1;ctx.setLineDash([3,5]);ctx.beginPath();ctx.moveTo(X(x),plot.top);ctx.lineTo(X(x),plot.bottom);ctx.stroke();
-        });
         series.forEach((values,j) => {
-            if (!enabled[j]) return;
             ctx.strokeStyle=palette[j];ctx.lineWidth=j===0?2.3:1.6;ctx.setLineDash(j===0?[]:j===1?[6,4]:[2,4]);ctx.beginPath();
             let started=false;
             data.x.forEach((x,i) => {
@@ -182,7 +186,7 @@
             });
             ctx.stroke();
         });
-        if (graph.querySelector('.show-points').checked) {
+        {
             ctx.setLineDash([]);
             [data.zeros,data.extrema,data.inflections].forEach((points,j) => points.forEach(p => {
                 if (p.x<view.min || p.x>view.max) return;
@@ -222,20 +226,28 @@
     }
     async function loadSolution() {
         const values=current(), key=JSON.stringify(values);
-        if(key===solutionKey && solutionContent.children.length)return;
+        if(key===solutionKey && solutionContent.querySelector('.solution-part'))return true;
         solutionAbort?.abort(); solutionAbort=new AbortController();
         const version=++solutionVersion;
         solutionContent.textContent='Koostan lahenduskäiku…';
+        solutionPanel.setAttribute('aria-busy', 'true');
         try {
             const result=await read(`/Functions/Solution?${params(values)}`,solutionAbort.signal);
             if(version!==solutionVersion)return;
             solutionContent.replaceChildren();
-            result.parts.forEach((part,i)=>{
-                const details=node('details','solution-part');details.open=true;
-                const summary=node('summary');summary.append(node('span','step-number',i+1),node('span','',part.title));
+            result.parts.forEach(part=>{
+                const details=node('section','solution-part');
+                const summary=node('h3','',part.title);
                 if(part.isNumerical)summary.append(node('span','tag','Numbriliselt'));
                 details.append(summary);
                 const steps=node('div','solution-steps');
+                if(part.answers?.length) {
+                    const answer=node('div','answer-line');
+                    answer.append(node('span','solution-label','Vastus'));
+                    part.answers.forEach(text=>answer.append(node('p','',text)));
+                    steps.append(answer);
+                }
+                steps.append(node('h4','solution-label','Lahenduskäik'));
                 part.steps.forEach(step=>{
                     const block=node('div','solution-step');
                     if(step.text)block.append(rich(step.text));
@@ -243,70 +255,43 @@
                     if(step.table)block.append(signTable(step.table));
                     steps.append(block);
                 });
-                if(part.answers?.length)steps.append(node('div','answer-line',part.answers.join('; ')));
                 details.append(steps);solutionContent.append(details);
             });
             solutionKey=key;renderMath(solutionContent);
-        } catch(error){if(error.name!=='AbortError'&&version===solutionVersion)solutionContent.textContent=error.message;}
+            return result.parts.length > 0;
+        } catch(error){if(error.name!=='AbortError'&&version===solutionVersion){solutionContent.textContent=error.message;setStatus(error.message,true);}}
+        finally { if (version === solutionVersion) solutionPanel.removeAttribute('aria-busy'); }
     }
-    solutionToggle.addEventListener('click',()=>{
-        solutionPanel.hidden=!solutionPanel.hidden;solutionToggle.setAttribute('aria-expanded',String(!solutionPanel.hidden));
-        solutionToggle.firstChild.textContent=solutionPanel.hidden?'Näita lahenduskäiku ':'Peida lahenduskäik ';
-        if(!solutionPanel.hidden){loadSolution();solutionPanel.scrollIntoView({behavior:'smooth',block:'start'});}
-    });
-    workspace.querySelector('.solution-close').addEventListener('click',()=>{solutionPanel.hidden=true;solutionToggle.setAttribute('aria-expanded','false');solutionToggle.firstChild.textContent='Näita lahenduskäiku ';solutionToggle.focus();});
-    graph.querySelector('.graph-range').addEventListener('submit',event=>{event.preventDefault();clearTimeout(zoomTimer);loadGraph();});
-    graph.querySelectorAll('[data-series],.show-points').forEach(input=>input.addEventListener('change',render));
-    graph.querySelector('.graph-reset').addEventListener('click',()=>{const values=current();graphFrom.value=values.from;graphTo.value=values.to;graphStep.value=.05;loadGraph();});
-    graph.querySelector('.graph-export').addEventListener('click',()=>{
-        if(!data){showGraphError('Sisesta kõigepealt funktsioon.');return;}
-        const link=document.createElement('a');link.download='funktsioon.png';link.href=canvas.toDataURL('image/png');link.click();
-    });
-    canvas.addEventListener('wheel',event=>{
-        if(!data||!view||!geometry)return;
-        event.preventDefault();
-        const plot=geometry.plot;
-        const ratio=Math.max(0,Math.min(1,(event.offsetX-plot.left)/(plot.right-plot.left)));
-        const center=view.min+ratio*(view.max-view.min);
-        const size=Math.max(.02,Math.min(2000,(view.max-view.min)*(event.deltaY>0?1.2:.8)));
-        let min=center-size*ratio,max=min+size;
-        if(min < -1000){min=-1000;max=min+size;}if(max>1000){max=1000;min=max-size;}
-        view={min,max};syncRange();render();
-        const neededStep = (view.max-view.min)/19000;
-        if (Number(graphStep.value)<neededStep) graphStep.value=Number(neededStep.toPrecision(3));
-        clearTimeout(zoomTimer);zoomTimer=setTimeout(loadGraph,250);
-    },{passive:false});
-    canvas.addEventListener('pointerdown',event=>{if(!data||!view)return;dragging={x:event.clientX,min:view.min,max:view.max};canvas.setPointerCapture(event.pointerId);tooltip.hidden=true;});
     canvas.addEventListener('pointermove',event=>{
         if(!data||!view||!geometry)return;
-        if(dragging){const shift=(event.clientX-dragging.x)/(geometry.plot.right-geometry.plot.left)*(dragging.max-dragging.min);const size=dragging.max-dragging.min;const min=Math.max(-1000,Math.min(1000-size,dragging.min-shift));view={min,max:min+size};syncRange();render();return;}
         const px=event.offsetX,py=event.offsetY,plot=geometry.plot;
         if(px<plot.left||px>plot.right||py<plot.top||py>plot.bottom){tooltip.hidden=true;return;}
         const target=view.min+(px-plot.left)/(plot.right-plot.left)*(view.max-view.min);
         let lo=0,hi=data.x.length-1;while(lo<hi){const m=Math.floor((lo+hi)/2);if(data.x[m]<target)lo=m+1;else hi=m;}
         let i=lo;if(i>0&&Math.abs(data.x[i-1]-target)<Math.abs(data.x[i]-target))i--;
-        const enabled=[...graph.querySelectorAll('[data-series]')].map(input=>input.checked);
         let text=`x = ${number(data.x[i])}`;
-        [data.y,data.derivativeY,data.secondDerivativeY].forEach((s,j)=>{if(enabled[j])text+=`\n${['f(x)','f′(x)','f″(x)'][j]} = ${s[i]==null?'∄':number(s[i])}`;});
-        if(graph.querySelector('.show-points').checked)[...data.zeros.map(p=>({...p,label:'Nullkoht'})),...data.extrema.map(p=>({...p,label:p.kind==='max'?'Maksimum':'Miinimum'})),...data.inflections.map(p=>({...p,label:'Käänupunkt'}))].forEach(p=>{if(Math.hypot(geometry.X(p.x)-px,geometry.Y(p.y)-py)<12)text+=`\n${p.label} (${number(p.x)}; ${number(p.y)})`;});
-        data.asymptotes.forEach(x=>{if(Math.abs(geometry.X(x)-px)<8)text+=`\nAsümptoot x = ${number(x)}`;});
+        text += `\nf(x) = ${data.y[i] == null ? '∄' : number(data.y[i])}`;
+        [...data.zeros.map(p=>({...p,label:'Nullkoht'})),...data.extrema.map(p=>({...p,label:p.kind==='max'?'Maksimum':'Miinimum'})),...data.inflections.map(p=>({...p,label:'Käänupunkt'}))].forEach(p=>{if(Math.hypot(geometry.X(p.x)-px,geometry.Y(p.y)-py)<12)text+=`\n${p.label} (${number(p.x)}; ${number(p.y)})`;});
         tooltip.textContent=text;tooltip.hidden=false;
         tooltip.style.left=`${Math.max(2,Math.min(width-tooltip.offsetWidth-5,px+12))}px`;
         tooltip.style.top=`${Math.max(2,Math.min(height-tooltip.offsetHeight-5,py+12))}px`;
     });
-    canvas.addEventListener('pointerup',()=>{if(dragging){dragging=null;loadGraph();}});
-    canvas.addEventListener('pointercancel',()=>{dragging=null;});
     canvas.addEventListener('pointerleave',()=>{tooltip.hidden=true;});
     if (preview) {
-        [formulaInput, inputFrom, inputTo].forEach(input => input.addEventListener('input', schedulePreview));
-        formulaInput.addEventListener('calculate', () => {
-            clearTimeout(previewTimer);
-            if (!current().formula) { setStatus('Koosta kõigepealt funktsioon.', true); return; }
-            loadPreview();
+        [formulaInput, inputFrom, inputTo, restrictInput].forEach(input => input.addEventListener('input', invalidatePreview));
+        formulaInput.addEventListener('calculate', loadPreview);
+        calculateButton.addEventListener('click', loadPreview);
+        form.addEventListener('keydown', event => {
+            if (!event.defaultPrevented && event.key === 'Enter' && event.target.matches('input')) {
+                event.preventDefault(); loadPreview();
+            }
+        });
+        form.addEventListener('submit', event => {
+            if (saveButton.disabled) { event.preventDefault(); loadPreview(); }
         });
         if (current().formula) loadPreview(); else render();
     }
-    else{graphFrom.value=workspace.dataset.from;graphTo.value=workspace.dataset.to;loadGraph();}
+    else { loadGraph(); loadSolution(); }
     new ResizeObserver(render).observe(canvas.parentElement);
-    window.addEventListener('themechange',render);
+    window.addEventListener('app-theme-change', render);
 })();

@@ -26,8 +26,13 @@ public static class SeedData
         if (await context.FunctionAnalyses.AnyAsync())
         {
             // Upgrade analyses saved by the previous engine without losing IDs or creation dates.
-            var legacy = await context.FunctionAnalyses.Where(f => f.SecondDerivative == "").ToListAsync();
-            foreach (var analysis in legacy) analyzer.Fill(analysis);
+            var legacy = await context.FunctionAnalyses.Where(f => f.AnalysisVersion < 2).ToListAsync();
+            foreach (var analysis in legacy)
+            {
+                // Keep saved records from earlier versions even if their formula
+                // is outside the current worksheet calculator.
+                if (analyzer.TryValidate(analysis.Formula, out _)) analyzer.Fill(analysis);
+            }
             await context.SaveChangesAsync();
             return;
         }

@@ -14,7 +14,7 @@ public class FunctionAnalyzer
         return error is null;
     }
 
-    public AnalysisResult Compute(string formula, double from = -5, double to = 5)
+    public AnalysisResult Compute(string formula, double from = -5, double to = 5, bool restrictDomain = false)
     {
         if (!TryValidate(formula, out var error))
             throw new FormulaException(error!);
@@ -23,7 +23,7 @@ public class FunctionAnalyzer
             throw new FormulaException(rangeError);
         try
         {
-            return engine.Analyze(formula.Trim(), from, to);
+            return engine.Analyze(formula.Trim(), from, to, restrictDomain);
         }
         catch (FormulaParseException ex)
         {
@@ -35,13 +35,14 @@ public class FunctionAnalyzer
         }
     }
 
-    public FunctionAnalysis Analyze(string formula, double from = -5, double to = 5)
+    public FunctionAnalysis Analyze(string formula, double from = -5, double to = 5, bool restrictDomain = false)
     {
         var analysis = new FunctionAnalysis
         {
             Formula = formula.Trim(),
             RangeFrom = from,
-            RangeTo = to
+            RangeTo = to,
+            RestrictDomain = restrictDomain
         };
         Fill(analysis);
         return analysis;
@@ -49,9 +50,12 @@ public class FunctionAnalyzer
 
     public void Fill(FunctionAnalysis analysis)
     {
-        var t = Compute(analysis.Formula, analysis.RangeFrom, analysis.RangeTo);
+        var t = Compute(analysis.Formula, analysis.RangeFrom, analysis.RangeTo, analysis.RestrictDomain);
         analysis.FormulaLatex = t.FormulaLatex;
         analysis.Domain = t.Domain;
+        analysis.ValueRange = t.ValueRange;
+        analysis.Parity = t.Parity;
+        analysis.AnalysisVersion = 2;
         analysis.Zeros = t.Zeros;
         analysis.Positivity = t.Positivity;
         analysis.Derivative = t.Derivative;
@@ -66,33 +70,28 @@ public class FunctionAnalyzer
         analysis.IsNumerical = t.IsNumerical;
     }
 
-    public object GetPlotData(string formula, double from, double to, double step)
+    public object GetPlotData(string formula, double from, double to, double step, bool restrictDomain = false)
     {
         if (!double.IsFinite(step) || step < 0.0001)
             throw new FormulaException("Samm peab olema vähemalt 0.0001.");
         if ((to - from) / step > 20_000)
             throw new FormulaException("Graafikul võib olla kuni 20 000 sammu. Suurenda sammu.");
-        var t = Compute(formula, from, to);
+        var t = Compute(formula, from, to, restrictDomain);
         var p = GraphBuilder.Build(t, from, to, step);
         return new
         {
             formula,
-            derivative = t.Derivative,
-            secondDerivative = t.SecondDerivative,
             p.X,
             p.Y,
-            derivativeY = p.DerivativeY,
-            secondDerivativeY = p.SecondDerivativeY,
             zeros = p.Zeros,
             extrema = p.Extrema,
-            inflections = p.InflectionPoints,
-            asymptotes = p.Asymptotes
+            inflections = p.InflectionPoints
         };
     }
 
-    public object GetSolution(string formula, double from, double to) => new
+    public object GetSolution(string formula, double from, double to, bool restrictDomain = false) => new
     {
-        parts = SolutionBuilder.Build(Compute(formula, from, to))
+        parts = SolutionBuilder.Build(Compute(formula, from, to, restrictDomain))
     };
     public static string? ValidateRange(double from, double to)
     {

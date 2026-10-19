@@ -42,7 +42,7 @@ public class Program
 
         app.MapControllerRoute(
             name: "default",
-            pattern: "{controller=Functions}/{action=Index}/{id?}");
+            pattern: "{controller=Functions}/{action=Create}/{id?}");
 
         await app.RunAsync();
     }

@@ -88,29 +88,41 @@
         if (event.key === 'Enter' || event.key === '=') {
             event.preventDefault();
             input.dispatchEvent(new Event('calculate', { bubbles: true }));
-        } else if (/^[0-9x()+\-*/^.,]$/.test(event.key)) {
-            event.preventDefault();
-            replaceSelection(event.key === ',' ? '.' : event.key);
-        } else if (event.target === input && event.key === 'Backspace') {
-            event.preventDefault();
-            if (start === end && start > 0) start--;
-            replaceSelection('');
-        } else if (event.target === input && event.key === 'Delete') {
-            event.preventDefault();
-            if (start === end && end < input.value.length) end++;
-            replaceSelection('');
         }
+
     });
     document.getElementById('calculatorExample').addEventListener('change', event => {
         const formula = event.target.value;
         if (!formula) return;
         input.value = formula;
         errorLabel.hidden = true;
-        document.getElementById('RangeFrom').value = formula === 'sqrt(4 - x^2)' ? -3 : formula === 'sin(x)' ? -6.3 : -5;
-        document.getElementById('RangeTo').value = formula === 'sqrt(4 - x^2)' ? 3 : formula === 'sin(x)' ? 6.3 : 5;
+        document.getElementById('RestrictDomain').checked = false;
+        document.getElementById('RangeFrom').value = -5;
+        document.getElementById('RangeTo').value = 5;
         select(input.value.length);
         input.dispatchEvent(new Event('input', { bubbles: true }));
         event.target.value = '';
     });
+    const restriction = document.getElementById('RestrictDomain');
+    const scopeSettings = calculator.querySelector('.scope-settings');
+    const rangeFrom = document.getElementById('RangeFrom');
+    const rangeTo = document.getElementById('RangeTo');
+    function updateScopeHint() {
+        document.getElementById('scopeHint').textContent = restriction.checked
+            ? 'Funktsiooni uuritakse sellel kinnisel lõigul, sealhulgas otspunktides.'
+            : 'Funktsiooni uuritakse kogu määramispiirkonnas. x-vahemik määrab graafiku akna.';
+        const boundary = value => Math.abs(Number(value) - Math.PI) < 1e-12 ? 'π' : value;
+        document.getElementById('scopeSummary').textContent = restriction.checked
+            ? `Uurimine lõigul [${boundary(rangeFrom.value)}; ${boundary(rangeTo.value)}]`
+            : 'Vahemiku seaded';
+        scopeSettings.classList.toggle('is-restricted', restriction.checked);
+    }
+    restriction.addEventListener('input', updateScopeHint);
+    [rangeFrom, rangeTo].forEach(input => {
+        input.addEventListener('input', updateScopeHint);
+        input.addEventListener('invalid', () => { scopeSettings.open = true; });
+    });
+    document.getElementById('calculatorExample').addEventListener('change', updateScopeHint);
+    updateScopeHint();
     updatePosition();
 })();

@@ -5,6 +5,7 @@ namespace csharp_math.Models;
 public class FunctionInputModel : IValidatableObject
 {
     public int? Id { get; set; }
+    public bool RestrictDomain { get; set; }
 
     [Required(ErrorMessage = "Sisesta funktsiooni valem.")]
     [StringLength(200, ErrorMessage = "Valem võib olla kuni 200 märki pikk.")]

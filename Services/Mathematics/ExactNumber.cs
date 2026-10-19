@@ -42,12 +42,14 @@ public static class ExactNumber
     public static bool HasExactForm(double v) => ExactForm(v) is not null;
     private static string TextToLatex(string t)
     {
+        if (t.StartsWith("-√(")) return "-" + TextToLatex(t[1..]);
+        if (t.StartsWith("√(") && t.EndsWith(')')) return "\\sqrt{" + TextToLatex(t[2..^1]) + "}";
         static string Part(string s)
         {
             if (s.StartsWith('(') && s.EndsWith(')'))
                 s = s[1..^1];
             s = Regex.Replace(s, @"√(\d+|e)", m => $"\\sqrt{{{m.Groups[1].Value}}}");
-            return s.Replace("π", "\\pi").Replace("e²", "e^{2}").Replace("e³", "e^{3}");
+            return s.Replace("π", "\\pi").Replace("e²", "e^{2}").Replace("e³", "e^{3}").Replace("e⁴", "e^{4}");
         }
 
         if (t.Contains("ln"))
@@ -94,6 +96,8 @@ public static class ExactNumber
             return FormatFraction(pi.p, pi.q, "π", "");
         if (Radical(v, tol) is { } root)
             return root;
+        if (Math.Abs(v) < 100 && Radical(v * v, tol) is { } squared)
+            return (v < 0 ? "-" : "") + $"√({squared})";
         foreach (var (power, text) in EPowers)
         {
             if (Fraction(v / Math.Exp(power), tol) is { } m)
@@ -112,7 +116,9 @@ public static class ExactNumber
         (0.5, "√e"),
         (2.0, "e²"),
         (1.5, "e√e"),
-        (3.0, "e³")
+        (3.0, "e³"),
+        (3.5, "e³√e"),
+        (4.0, "e⁴")
     }.SelectMany(a => new[] { a, (-a.Item1, a.Item2) }).ToArray();
     private static (long p, long q)? Fraction(double v, double tol, int maxDenominator = 12, int maxNumerator = 1000)
     {
@@ -134,7 +140,12 @@ public static class ExactNumber
             2,
             3,
             4,
-            6
+            5,
+            6,
+            7,
+            8,
+            10,
+            12
         }
 
         )

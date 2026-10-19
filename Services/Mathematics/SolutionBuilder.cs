@@ -10,7 +10,20 @@ public static class SolutionBuilder
     public static List<SolutionSection> Build(AnalysisResult t)
     {
         var v = t.Intermediate;
-        return [Domain(t, v), Zeros(t, v), Positivity(t, v), new("derivative", "Tuletis", DifferentiationExplainer.Steps(v.Function, "f", "f'"), [t.Derivative], false), CriticalPoints(t, v), Monotonicity(t, v), new("secondDerivative", "Teine tuletis", DifferentiationExplainer.Steps(v.Derivative, "f'", "f''"), [t.SecondDerivative], false), InflectionPoints(t, v),];
+        return
+        [
+            Domain(t, v),
+            new("parity", "Paarsus", [new(t.ParityResult.Explanation, t.ParityResult.Formula)], [t.Parity], false),
+            Zeros(t, v),
+            Positivity(t, v),
+            new("derivative", "Esimene tuletis", DifferentiationExplainer.Steps(v.Function, "f", "f'"), [t.Derivative], false),
+            CriticalPoints(t, v),
+            Monotonicity(t, v),
+            Extrema(t, v),
+            new("secondDerivative", "Teine tuletis", DifferentiationExplainer.Steps(v.Derivative, "f'", "f''"), [t.SecondDerivative], false),
+            Concavity(t, v),
+            InflectionPoints(t, v)
+        ];
     }
 
     private static SolutionSection Domain(AnalysisResult t, IntermediateResults v)
@@ -33,7 +46,11 @@ public static class SolutionBuilder
 
         if (!v.DomainComplete)
             s.Add(new($"Leitud numbriliselt lõigul {Interval(v.A, v.B)}."));
-        return new("domain", "Määramispiirkond", s, [t.Domain], !v.DomainComplete);
+        if (t.RestrictDomain)
+            s.Add(new("Valitud lõik piirab määramispiirkonda:", $"X = X_f \\cap [{ExactNumber.Latex(v.A)}; {ExactNumber.Latex(v.B)}] = {SetLatex(t.FunctionDomain)}"));
+        s.Add(new("Muutumispiirkonna leidmiseks võrdleme kriitiliste punktide ja otspunktide väärtusi ning avatud piiride piirväärtusi."));
+        s.AddRange(t.RangeResult.Steps.Select(text => new SolutionStep(text)));
+        return new("domain", "Määramispiirkond ja muutumispiirkond", s, [$"X = {t.Domain}", $"Y = {t.ValueRange}"], !v.DomainComplete || !t.RangeResult.Complete);
     }
 
     private static SolutionSection Zeros(AnalysisResult t, IntermediateResults v)
@@ -85,13 +102,30 @@ public static class SolutionBuilder
         };
         if (IsComposite(table))
             s.Add(new("Sama märgiga naabervahemikud ühendatakse ($f'$ märk ei muutu)."));
+        return new("monotonicity", "Kasvamis- ja kahanemispiirkond", s, [t.Monotonicity], !v.DerivativeComplete);
+    }
+
+    private static SolutionSection Extrema(AnalysisResult t, IntermediateResults v)
+    {
+        var s = new List<SolutionStep> { new("Maksimumis muutub f′ märk plussist miinuseks, miinimumis miinusest plussiks.") };
         foreach (var c in v.CriticalPoints)
         {
             var e = t.ExtremumPoints.FirstOrDefault(p => Math.Abs(p.X - c) <= IntervalSet.Tolerance);
             s.Add(e is null ? new($"$x = {ExactNumber.Latex(c)}$: $f'$ märk ei muutu – ekstreemumit pole.") : new(e.Kind == "max" ? "$+ \\to -$:" : "$- \\to +$:", $"y_{{\\text{{{e.Kind}}}}} = {Value(v.Function, c, e.Y)}"));
         }
+        if (t.RestrictDomain)
+            foreach (var e in t.ExtremumPoints.Where(e => !v.CriticalPoints.Contains(e.X)))
+                s.Add(new("Lõigu otspunkti võrdleme lõigu sees asuvate väärtustega:", $"{(e.Kind == "max" ? "\\max" : "\\min")} f({ExactNumber.Latex(e.X)}) = {ExactNumber.Latex(e.Y)}"));
+        return new("extrema", "Ekstreemumid", s, [t.Extrema], !v.DerivativeComplete);
+    }
 
-        return new("monotonicity", "Monotoonsus ja ekstreemumid", s, [t.Monotonicity, t.Extrema], !v.DerivativeComplete);
+    private static SolutionSection Concavity(AnalysisResult t, IntermediateResults v)
+    {
+        var table = Table(t.EvaluateSecondDerivative, "f''", v.ConcavityDomain, v.ConcavityBreakpoints, "f(x)", sign => sign switch
+        {
+            "+" => "\\cup", "−" => "\\cap", _ => "—"
+        }, x => t.InflectionPointCoordinates.Any(k => Math.Abs(k.X - x) <= IntervalSet.Tolerance) ? "\\text{K}" : null, RangeBoundaries(v, v.SecondDerivativeComplete));
+        return new("concavity", "Kumerus ja nõgusus", [new("f″ > 0: nõgus (∪); f″ < 0: kumer (∩).", null, table)], [t.Concavity], !v.SecondDerivativeComplete);
     }
 
     private static SolutionSection InflectionPoints(AnalysisResult t, IntermediateResults v)
@@ -100,21 +134,13 @@ public static class SolutionBuilder
         var undefined = v.InflectionCandidates.Where(k => !v.SecondDerivativeRoots.Values.Any(j => Math.Abs(j - k) <= IntervalSet.Tolerance)).ToList();
         if (undefined.Count > 0)
             s.Add(new("$f''$ ei ole määratud:", EquationExplainer.FormatList(undefined)));
-        var table = Table(t.EvaluateSecondDerivative, "f''", v.ConcavityDomain, v.ConcavityBreakpoints, "f(x)", sign => sign switch
-        {
-            "+" => "\\cup",
-            "−" => "\\cap",
-            "0" => "—",
-            _ => null
-        }, x => t.InflectionPointCoordinates.Any(k => Math.Abs(k.X - x) <= IntervalSet.Tolerance) ? "\\text{K}" : null, RangeBoundaries(v, v.SecondDerivativeComplete));
-        s.Add(new("$f''$ märgid ($+ \\Rightarrow \\cup$ nõgus, $- \\Rightarrow \\cap$ kumer):", null, table));
         foreach (var k in v.InflectionCandidates)
         {
             var kp = t.InflectionPointCoordinates.FirstOrDefault(p => Math.Abs(p.X - k) <= IntervalSet.Tolerance);
             s.Add(kp is null ? new($"$x = {ExactNumber.Latex(k)}$: $f''$ märk ei muutu – käänupunkti pole.") : new("Käänupunkt:", $"y_{{K}} = {Value(v.Function, k, kp.Y)}"));
         }
 
-        return new("inflections", "Käänupunktid, kumerus ja nõgusus", s, [t.InflectionPoints, t.Concavity], !v.SecondDerivativeComplete);
+        return new("inflections", "Käänupunktid", s, [t.InflectionPoints], !v.SecondDerivativeComplete);
     }
 
     private static SignTable Table(Func<double, double> g, string symbol, IntervalSet domain, IEnumerable<double> breakpoints, string? meaningLabel, Func<string, string?> intervalMeaning, Func<double, string?> pointMeaning, double[] rangeBoundaries)

@@ -1,8 +1,13 @@
 @model FunctionInputModel
-@{ ViewData["Title"] = "Muuda uurimist"; }
-<div class="page-heading"><h1 class="h2">Muuda funktsiooni</h1><p>Muuda valemit kalkulaatori nuppudega. Kõik omadused arvutatakse uuesti.</p></div>
-<div class="solver-layout"><div class="solver-input"><form asp-action="Edit" method="post" class="analysis-form"><input asp-for="Id" type="hidden" /><partial name="_FunctionForm" model="Model" /></form></div>
-<partial name="_Workspace" model="@(new FunctionAnalysis { Formula = Model.Formula, RangeFrom = Model.RangeFrom, RangeTo = Model.RangeTo })" />
+@{ ViewData["Title"] = "Muuda funktsiooni"; }
+<div class="calculator-page">
+    <div class="page-heading"><h1>Muuda funktsiooni</h1><p>Muuda valemit või uurimispiirkonda ja vaata uuendatud lahendust.</p></div>
+    <form id="analysisForm" asp-action="Edit" method="post" class="analysis-form">
+        <input asp-for="Id" type="hidden" />
+        <partial name="_FunctionForm" model="Model" />
+    </form>
+    <partial name="_Workspace" model="@(new FunctionAnalysis { Formula = Model.Formula, RangeFrom = Model.RangeFrom, RangeTo = Model.RangeTo, RestrictDomain = Model.RestrictDomain })" />
+
 </div>
 @section Scripts {
     <script src="~/js/formula-calculator.js" asp-append-version="true"></script>

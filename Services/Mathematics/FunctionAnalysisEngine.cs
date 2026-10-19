@@ -9,6 +9,11 @@ public sealed class AnalysisResult
 {
     public required string FormulaLatex { get; init; }
     public required string Domain { get; init; }
+    public required string ValueRange { get; init; }
+    public bool RestrictDomain { get; init; }
+    public required ParityResult ParityResult { get; init; }
+    public string Parity => ParityResult.Text;
+    public required ValueRangeResult RangeResult { get; init; }
     public required string Zeros { get; init; }
     public required string Derivative { get; init; }
     public required string DerivativeLatex { get; init; }
@@ -25,7 +30,6 @@ public sealed class AnalysisResult
     public required IReadOnlyList<Point> ZeroPoints { get; init; }
     public required IReadOnlyList<Extremum> ExtremumPoints { get; init; }
     public required IReadOnlyList<Point> InflectionPointCoordinates { get; init; }
-    public required IReadOnlyList<double> Asymptotes { get; init; }
     public required IReadOnlyList<double> Discontinuities { get; init; }
     public required IntervalSet FunctionDomain { get; init; }
     public required IntervalSet DerivativeDomain { get; init; }
@@ -67,7 +71,7 @@ public sealed class FunctionAnalysisEngine
         return new LatexFormulas(ExpressionFormatter.Latex(f), ExpressionFormatter.Latex(f1), ExpressionFormatter.Latex(ExpressionMath.Differentiate(f1)));
     }
 
-    public AnalysisResult Analyze(string formula, double a, double b)
+    public AnalysisResult Analyze(string formula, double a, double b, bool restrictDomain = false)
     {
         var parsed = FormulaParser.Parse(formula);
         var f = parsed.Expression;
@@ -79,6 +83,7 @@ public sealed class FunctionAnalysisEngine
         var (D, domainComplete) = DomainAnalyzer.Domain(parsed.Constraints, a, b);
         var (D1, derivativeDomainComplete) = DomainAnalyzer.Domain(ConstraintCollector.Collect(f1).All, a, b);
         var (D2, secondDerivativeDomainComplete) = DomainAnalyzer.Domain(ConstraintCollector.Collect(f2).All, a, b);
+        if (restrictDomain) D = D.Intersect(a, b);
         var domainWithinRange = domainComplete && !D.IsEmpty && D.IsWithin(a, b);
         bool Complete(params bool[] parts) => domainWithinRange || parts.All(o => o);
         IntervalSet AnalysisDomain(bool complete) => complete ? D : D.Intersect(a, b);
@@ -105,9 +110,23 @@ public sealed class FunctionAnalysisEngine
                 extrema.Add(new Extremum(c, y, "min"));
         }
 
+        // On a prescribed closed interval, also compare the endpoint values.
+        if (restrictDomain)
+        {
+            foreach (var endpoint in D.ClosedEndpoints())
+            {
+                var y = ExactNumber.Snap(F(endpoint));
+                var isLeft = D.Intervals.Any(i => i.Start == endpoint);
+                var nearby = F(endpoint + (isLeft ? 1 : -1) * Delta(endpoint, allBreakpoints));
+                if (double.IsFinite(y) && double.IsFinite(nearby) && Math.Abs(y - nearby) > 1e-12)
+                    extrema.Add(new Extremum(endpoint, y, y < nearby ? "min" : "max"));
+            }
+            extrema.Sort((u, v) => u.X.CompareTo(v.X));
+        }
+
         var monotonicityBreakpoints = j1.Values.Concat(D1.Endpoints()).ToList();
         var (increasing, decreasing) = DomainAnalyzer.SignRegions(F1, AnalysisDomain(derivativeComplete), monotonicityBreakpoints, merge: true);
-        var (positive, negativeRegions) = DomainAnalyzer.SignRegions(F, AnalysisDomain(zerosComplete), j0.Values, merge: false);
+        var (positive, negativeRegions) = DomainAnalyzer.SignRegions(F, AnalysisDomain(zerosComplete), j0.Values, merge: false, includeEndpoints: true);
         var j2 = RootFinder.Find(f2, a, b);
         var secondDerivativeComplete = Complete(domainComplete, secondDerivativeDomainComplete, j2.Complete);
         var inflectionCandidates = j2.Values.Concat(D2.Endpoints()).Where(D.ContainsInterior).Distinct().Order().ToList();
@@ -125,10 +144,16 @@ public sealed class FunctionAnalysisEngine
         var (concaveUp, concaveDown) = DomainAnalyzer.SignRegions(F2, AnalysisDomain(secondDerivativeComplete), concavityBreakpoints, merge: true, preventMergeAt: D1.Endpoints());
         var range = $" (vahemikus [{ExactNumber.Decimal(a)}; {ExactNumber.Decimal(b)}])";
         string ScopeNote(bool complete) => complete ? "" : range;
+        var parity = FunctionProperties.Parity(f, D);
+        var valueRange = FunctionProperties.ValueRange(f, D, criticalPoints, domainComplete && derivativeComplete);
         return new AnalysisResult
         {
             FormulaLatex = ExpressionFormatter.Latex(f),
             Domain = D.ToText() + ScopeNote(domainComplete),
+            ValueRange = valueRange.Text,
+            RestrictDomain = restrictDomain,
+            RangeResult = valueRange,
+            ParityResult = parity,
             Zeros = j0.AllPoints ? "kõik x ∈ X" : FormatList(zeros, "x") + ScopeNote(zerosComplete),
             Derivative = ExpressionFormatter.ToText(f1),
             DerivativeLatex = ExpressionFormatter.Latex(f1),
@@ -140,11 +165,10 @@ public sealed class FunctionAnalysisEngine
             SecondDerivativeLatex = ExpressionFormatter.Latex(f2),
             InflectionPoints = (inflectionPoints.Count == 0 ? NoneFound : string.Join("; ", inflectionPoints.Select((p, i) => $"K{(inflectionPoints.Count > 1 ? Subscript(i + 1) : "")}({ExactNumber.Short(p.X)}; {ExactNumber.Short(p.Y)})"))) + ScopeNote(secondDerivativeComplete),
             Concavity = $"X∪ = {concaveUp.ToText()}; X∩ = {concaveDown.ToText()}" + ScopeNote(secondDerivativeComplete),
-            IsNumerical = !(domainComplete && zerosComplete && derivativeComplete && secondDerivativeComplete),
+            IsNumerical = !(domainComplete && zerosComplete && derivativeComplete && secondDerivativeComplete && valueRange.Complete),
             ZeroPoints = zeros.Select(x => new Point(x, 0)).ToList(),
             ExtremumPoints = extrema,
             InflectionPointCoordinates = inflectionPoints,
-            Asymptotes = D.Endpoints().Where(p => IsVerticalAsymptote(F, D, p)).ToList(),
             Discontinuities = Uniq(D.Endpoints().Concat(D1.Endpoints()).Concat(D2.Endpoints()).Where(p => !D.ContainsInterior(p) || !D1.Contains(p) || !D2.Contains(p))),
             FunctionDomain = D,
             DerivativeDomain = D1,
@@ -160,24 +184,6 @@ public sealed class FunctionAnalysisEngine
     {
         var nearest = otherPoints.Where(p => Math.Abs(p - c) > IntervalSet.Tolerance).Select(p => Math.Abs(p - c)).DefaultIfEmpty(1).Min();
         return Math.Min(1e-4, nearest * 0.4);
-    }
-
-    private static bool IsVerticalAsymptote(Func<double, double> f, IntervalSet d, double p)
-    {
-        foreach (var direction in new[]
-        {
-            1.0,
-            -1.0
-        }
-
-        )
-        {
-            double nearby = f(p + direction * 1e-7), farther = f(p + direction * 1e-3);
-            if (d.ContainsInterior(p + direction * 1e-7) && Math.Abs(nearby) - Math.Abs(farther) > 5)
-                return true;
-        }
-
-        return false;
     }
 
     private static List<double> Uniq(IEnumerable<double> points)

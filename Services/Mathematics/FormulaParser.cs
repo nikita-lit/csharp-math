@@ -13,33 +13,10 @@ public static class FormulaParser
     {
         ["sin"] = Function.Sin,
         ["cos"] = Function.Cos,
-        ["tan"] = Function.Tan,
-        ["tg"] = Function.Tan,
-        ["cot"] = Function.Cot,
-        ["ctg"] = Function.Cot,
-        ["cotg"] = Function.Cot,
-        ["sec"] = Function.Sec,
-        ["csc"] = Function.Csc,
-        ["cosec"] = Function.Csc,
-        ["asin"] = Function.Asin,
-        ["arcsin"] = Function.Asin,
-        ["acos"] = Function.Acos,
-        ["arccos"] = Function.Acos,
-        ["atan"] = Function.Atan,
-        ["arctan"] = Function.Atan,
-        ["arctg"] = Function.Atan,
-        ["acot"] = Function.Acot,
-        ["arccot"] = Function.Acot,
-        ["arcctg"] = Function.Acot,
-        ["sinh"] = Function.Sinh,
-        ["cosh"] = Function.Cosh,
-        ["tanh"] = Function.Tanh,
         ["exp"] = Function.Exp,
         ["ln"] = Function.Ln,
-        ["lg"] = Function.Lg,
-        ["log"] = Function.Lg,
     };
-    private static readonly string[] SpecialFunctions = ["sqrt", "cbrt", "abs"];
+    private static readonly string[] SpecialFunctions = ["sqrt", "abs"];
     private static readonly string[] Names = Functions.Keys.Concat(SpecialFunctions).Concat(["pi", "π", "x", "e"]).OrderByDescending(n => n.Length).ToArray();
     public static ParsedFormula Parse(string input)
     {
@@ -151,7 +128,7 @@ public static class FormulaParser
         {
             var name = Names.FirstOrDefault(n => string.CompareOrdinal(word, i, n, 0, n.Length) == 0);
             if (name is null)
-                throw new FormulaParseException($"Tundmatu tähis '{word[i..]}' (positsioon {start + i + 1}). Muutuja peab olema x; lubatud funktsioonid: " + "sin, cos, tan (tg), cot (ctg), arcsin, arccos, arctan, sinh, cosh, tanh, exp, ln, lg (log), sqrt, cbrt; konstandid pi ja e.");
+                throw new FormulaParseException($"Tundmatu tähis '{word[i..]}' (positsioon {start + i + 1}). Muutuja peab olema x; lubatud funktsioonid: " + "sin, cos, exp, ln, sqrt; konstandid pi ja e.");
             result.Add(new Token(Kind.Name, name == "π" ? "pi" : name, start + i + 1));
             i += name.Length;
         }
@@ -279,7 +256,6 @@ public static class FormulaParser
                         "e" => Expression.E,
                         "abs" => throw new FormulaParseException("abs() ei ole toetatud: absoluutväärtusega funktsiooni ei saa siin uurida."),
                         "sqrt" => PowerWithConstraint(Argument(), ExpressionMath.Rational(1, 2), m.Position),
-                        "cbrt" => PowerWithConstraint(Argument(), ExpressionMath.Rational(1, 3), m.Position),
                         _ => FunctionWithConstraint(Functions[m.Text], Argument(), m.Position)
                     };
                 case Kind.End:

@@ -28,6 +28,10 @@ public class FunctionAnalysis
     public string FormulaLatex { get; set; } = string.Empty;
     public string DerivativeLatex { get; set; } = string.Empty;
     public string SecondDerivativeLatex { get; set; } = string.Empty;
+    public string ValueRange { get; set; } = string.Empty;
+    public string Parity { get; set; } = string.Empty;
+    public bool RestrictDomain { get; set; }
+    public int AnalysisVersion { get; set; }
     public string Positivity { get; set; } = string.Empty;
     public string Monotonicity { get; set; } = string.Empty;
     public string SecondDerivative { get; set; } = string.Empty;

@@ -1,13 +1,14 @@
 @model FunctionAnalysis
 <dl class="analysis-table">
-    <div><dt>Määramispiirkond <span>X</span></dt><dd data-property="domain">@Model.Domain</dd></div>
-    <div><dt>Nullkohad <span>f(x) = 0</span></dt><dd data-property="zeros">@Model.Zeros</dd></div>
-    <div><dt>Positiivsus ja negatiivsus <span>+ / −</span></dt><dd data-property="positivity">@Model.Positivity</dd></div>
-    <div><dt>Tuletis <span>f′(x)</span></dt><dd class="math" data-property="derivative" data-latex="@Model.DerivativeLatex">@Model.Derivative</dd></div>
-    <div><dt>Kriitilised punktid <span>f′(x) = 0 / ∄</span></dt><dd data-property="criticalPoints">@Model.CriticalPoints</dd></div>
-    <div><dt>Ekstreemumid <span>max / min</span></dt><dd data-property="extrema">@Model.Extrema</dd></div>
-    <div><dt>Monotoonsus <span>↗ / ↘</span></dt><dd data-property="monotonicity">@Model.Monotonicity</dd></div>
-    <div><dt>Teine tuletis <span>f″(x)</span></dt><dd class="math" data-property="secondDerivative" data-latex="@Model.SecondDerivativeLatex">@Model.SecondDerivative</dd></div>
-    <div><dt>Käänupunktid <span>K</span></dt><dd data-property="inflectionPoints">@Model.InflectionPoints</dd></div>
-    <div><dt>Kumerus ja nõgusus <span>∩ / ∪</span></dt><dd data-property="concavity">@Model.Concavity</dd></div>
+    <div><dt>1. Määramispiirkond ja muutumispiirkond</dt><dd>X = <span data-property="domain">@Model.Domain</span><br />Y = <span data-property="valueRange">@Model.ValueRange</span></dd></div>
+    <div><dt>2. Paarsus</dt><dd data-property="parity">@Model.Parity</dd></div>
+    <div><dt>3. Nullkohad <span>f(x) = 0</span></dt><dd data-property="zeros">@Model.Zeros</dd></div>
+    <div><dt>4. Positiivsus- ja negatiivsuspiirkond</dt><dd data-property="positivity">@Model.Positivity</dd></div>
+    <div><dt>5. Esimene tuletis <span>f′(x)</span></dt><dd class="math" data-property="derivative" data-latex="@Model.DerivativeLatex">@Model.Derivative</dd></div>
+    <div><dt>6. Kriitilised punktid</dt><dd data-property="criticalPoints">@Model.CriticalPoints</dd></div>
+    <div><dt>7. Kasvamis- ja kahanemispiirkond</dt><dd data-property="monotonicity">@Model.Monotonicity</dd></div>
+    <div><dt>8. Ekstreemumid <span>max / min</span></dt><dd data-property="extrema">@Model.Extrema</dd></div>
+    <div><dt>9. Teine tuletis <span>f″(x)</span></dt><dd class="math" data-property="secondDerivative" data-latex="@Model.SecondDerivativeLatex">@Model.SecondDerivative</dd></div>
+    <div><dt>10. Kumerus ja nõgusus <span>∩ / ∪</span></dt><dd data-property="concavity">@Model.Concavity</dd></div>
+    <div><dt>11. Käänupunktid</dt><dd data-property="inflectionPoints">@Model.InflectionPoints</dd></div>
 </dl>

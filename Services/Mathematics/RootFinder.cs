@@ -39,7 +39,7 @@ public static class RootFinder
 
         var sym = ExpressionMath.Sym(g);
         var x = ExpressionMath.Sym(ExpressionMath.X);
-        if (PolynomialRoots(sym, x) is { } polynomialRoots)
+        if (ExpressionMath.IsPolynomial(g) && PolynomialRoots(sym, x) is { } polynomialRoots)
             return new RootResult(polynomialRoots, true);
         if (ExpressionMath.IsRationalFunction(g))
         {
@@ -75,10 +75,19 @@ public static class RootFinder
             return null;
         var terms = sum.Item.ToList();
         static IEnumerable<Expression> SplitFactors(Expression e) => e is Expression.Product p ? p.Item : [e];
-        var commonFactor = SplitFactors(terms[0]).Where(ExpressionMath.ContainsVariable).FirstOrDefault(t => terms.Skip(1).All(l => SplitFactors(l).Contains(t)));
+        static (Expression Base, BigRational Power) Power(Expression e) => e is Expression.Power { Item2: Expression.Number n } p ? (p.Item1, n.Item) : (e, BigRational.One);
+        var powers = terms.Select(t => SplitFactors(t).Where(ExpressionMath.ContainsVariable).Select(Power).ToList()).ToList();
+        var commonBase = powers[0].Select(p => p.Base).FirstOrDefault(b => powers.Skip(1).All(t => t.Any(p => p.Base.Equals(b))));
+        Expression? commonFactor = null;
+        if (commonBase is not null)
+        {
+            var exponent = powers.Select(t => t.First(p => p.Base.Equals(commonBase)).Power).Min();
+            commonFactor = Operators.pow(commonBase, Expression.NewNumber(exponent));
+        }
         if (commonFactor is null)
             return null;
-        var quotient = terms.Aggregate(Expression.Zero, (s, l) => Operators.add(s, Operators.divide(l, commonFactor)));
+        var quotient = ExpressionMath.NormalizePowers(terms.Aggregate(Expression.Zero, (s, l) => Operators.add(s, Operators.divide(l, commonFactor))));
+        if (quotient.Equals(g)) return null;
         return [commonFactor, quotient];
     }
 
@@ -117,6 +126,7 @@ public static class RootFinder
 
     private static List<double>? PolynomialRoots(SymbolicExpression p, SymbolicExpression x)
     {
+        p = p.Expand();
         if (!p.IsPolynomial(x))
             return null;
         var squareFree = p;
@@ -192,7 +202,8 @@ public static class RootFinder
         var roots = new List<double>();
         for (var i = 0; i <= SampleSteps; i++)
         {
-            if (ys[i] == 0)
+            // Endpoints such as sin(pi) are not exactly zero in floating point.
+            if (ys[i] == 0 || ((i == 0 || i == SampleSteps) && Math.Abs(ys[i]) < 1e-12))
             {
                 roots.Add(xs[i]);
                 continue;

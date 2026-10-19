@@ -6,7 +6,7 @@ namespace csharp_math.Controllers;
 
 public class HomeController : Controller
 {
-    public IActionResult Index() => RedirectToAction("Index", "Functions");
+    public IActionResult Index() => RedirectToAction("Create", "Functions");
     public IActionResult Theory() => View();
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()

@@ -5,16 +5,16 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Function Explorer</title>
-    <script>try { document.documentElement.dataset.theme = localStorage.getItem('lab-theme') || 'light'; } catch { }</script>
+    <script src="~/js/preferences.js" asp-append-version="true"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/lib/katex/katex.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3" aria-label="Põhinavigatsioon">
+        <nav class="navbar navbar-expand-sm navbar-light border-bottom box-shadow mb-3" aria-label="Põhinavigatsioon">
             <div class="container">
-                <a class="navbar-brand" asp-controller="Functions" asp-action="Index">Function Explorer</a>
+                <a class="navbar-brand" asp-controller="Functions" asp-action="Create">Function Explorer</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavigation" aria-controls="mainNavigation" aria-expanded="false" aria-label="Ava navigatsioon"><span class="navbar-toggler-icon"></span></button>
                 <div class="navbar-collapse collapse" id="mainNavigation">
                     <ul class="navbar-nav me-auto">
@@ -22,15 +22,24 @@
                         <li class="nav-item"><a class="nav-link @(action is "Index" or "Delete" ? "active" : "")" asp-controller="Functions" asp-action="Index">Salvestatud</a></li>
                         <li class="nav-item"><a class="nav-link @(action == "Theory" ? "active" : "")" asp-controller="Home" asp-action="Theory">Teooria</a></li>
                     </ul>
-                    <button class="btn btn-outline-secondary btn-sm theme-toggle" type="button" aria-label="Vaheta värviteemat"><span class="theme-label">Tume teema</span></button>
+                </div>
+                <div class="display-preferences">
+                        <select class="language-select" data-language aria-label="Keel">
+                            <option value="et" lang="et">EST</option>
+                            <option value="ru" lang="ru">RUS</option>
+                        </select>
+                        <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false" aria-label="Tume teema" title="Tume teema">
+                            <svg class="theme-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z" /></svg>
+                        </button>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container"><main id="main-content" role="main" class="pb-4">@RenderBody()</main></div>
+    <div class="container app-container"><main id="main-content" role="main" class="pb-4">@RenderBody()</main></div>
     <footer class="border-top footer text-muted"><div class="container">&copy; 2026 - Function Explorer · <a asp-controller="Home" asp-action="Theory">Teooria</a></div></footer>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/lib/katex/katex.min.js"></script>
+    <script src="~/js/translations.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

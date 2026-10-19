@@ -114,9 +114,9 @@ public static class EquationExplainer
 
         var sym = ExpressionMath.Sym(g);
         var x = ExpressionMath.Sym(ExpressionMath.X);
-        if (sym.IsPolynomial(x))
+        if (ExpressionMath.IsPolynomial(g))
         {
-            Polynomial(sym, s, "x");
+            Polynomial(sym.Expand(), s, "x");
             return;
         }
 
@@ -143,7 +143,7 @@ public static class EquationExplainer
             }
         }
 
-        s.Add(new($"Algebraliselt ei lahendu – **numbriliselt** lõigul {Interval(a, b)} (märgimuutus + Brenti meetod)."));
+        s.Add(new($"Algebraliselt ei lahendu – **numbriliselt** lõigul {Interval(a, b)}."));
     }
 
     private static void PartResult(Expression t, List<SolutionStep> s, double a, double b)
@@ -170,7 +170,7 @@ public static class EquationExplainer
                     return;
                 }
 
-                s.Add(new("Irratsionaalsed kordajad – juured **numbriliselt** (kaasmaatriksi omaväärtused, Newton)."));
+                s.Add(new("Irratsionaalsed kordajad – juured **numbriliselt**, vastused on ligikaudsed."));
                 return;
             }
 
@@ -239,7 +239,7 @@ public static class EquationExplainer
             return;
         }
 
-        s.Add(new($"{power}. aste, ratsionaalseid juuri pole – **numbriliselt** (kaasmaatriksi omaväärtused, Newton)."));
+        s.Add(new($"{power}. aste, ratsionaalseid juuri pole – **numbriliselt**, vastused on ligikaudsed."));
     }
 
     private static void Linear(BigRational[] k, List<SolutionStep> s, string variable)

@@ -1,7 +1,7 @@
 @model string
-<section class="panel function-graph"><div class="panel-heading"><div><span class="eyebrow">VAATA SUUREMAT PILTI</span><h2>Funktsiooni graafik</h2></div><button type="button" class="button quiet graph-export" title="Salvesta graafik pildina">PNG ↓</button></div>
-    <div class="graph-legend"><label class="legend-function"><input type="checkbox" data-series="0" checked /> f(x)</label><label class="legend-derivative"><input type="checkbox" data-series="1" checked /> f′(x)</label><label class="legend-second"><input type="checkbox" data-series="2" /> f″(x)</label><label class="legend-points"><input type="checkbox" class="show-points" checked /> Erilised punktid</label></div>
-    <div class="graph-canvas-wrapper"><canvas id="functionChart" role="img" aria-label="Funktsiooni ja tuletiste graafik"></canvas><div class="graph-empty"><span>ƒ(x)</span><p>Iga avastus algab valemist.</p><small>Sisesta funktsioon, et näha graafikut.</small></div><div class="graph-tooltip" hidden></div></div>
-    <details class="graph-settings"><summary>Graafiku seaded</summary><form class="graph-range"><div><label for="graphFrom">x alates</label><input id="graphFrom" type="number" step="any" min="-1000" max="1000" value="-5" required /></div><span class="range-dash">—</span><div><label for="graphTo">x kuni</label><input id="graphTo" type="number" step="any" min="-1000" max="1000" value="5" required /></div><div><label for="graphStep">Samm</label><input id="graphStep" type="number" step="any" min="0.0001" value="0.05" required /></div><button class="button secondary" type="submit">Joonesta ↗</button></form></details>
-    <div class="graph-error error-message" role="alert" hidden></div><div class="graph-footer"><span>Hiireratas suurendab · lohista liikumiseks</span><button type="button" class="graph-reset text-link">Lähtesta ↺</button></div>
+<section class="panel function-graph">
+    <div class="panel-heading"><h2>Funktsiooni graafik</h2></div>
+    <div class="graph-canvas-wrapper"><canvas id="functionChart" role="img" aria-label="Funktsiooni graafik"></canvas><div class="graph-empty"><span>ƒ(x)</span><p>Sisesta funktsiooni valem.</p></div><div class="graph-tooltip" hidden></div></div>
+    <div class="graph-error error-message" role="alert" hidden></div>
+    <p class="graph-footer">Graafikul on märgitud nullkohad, ekstreemumid ja käänupunktid.</p>
 </section>
