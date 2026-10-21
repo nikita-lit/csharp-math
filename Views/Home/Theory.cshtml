@@ -1,98 +1,209 @@
-@{ ViewData["Title"] = "Funktsiooni uurimine lihtsalt"; }
-<div class="page-heading"><h1>Funktsiooni uurimine lihtsalt</h1><p>11 teemat: mida leida, kuidas leida ja lihtne näide.</p></div>
+@{
+    ViewData["Title"] = "Funktsiooni uurimine lihtsalt";
+}
+
+<div class="page-heading">
+    <h1>Funktsiooni uurimine lihtsalt</h1>
+    <p>11 teemat: mida leida, kuidas leida ja lihtne näide.</p>
+</div>
+
 <div class="theory-layout">
-<nav class="theory-toc" aria-label="Sisukord">
-    <a href="#domain">1. Määramis- ja muutumispiirkond</a><a href="#parity">2. Paarsus</a><a href="#zeros">3. Nullkohad</a><a href="#signs">4. Märgipiirkonnad</a><a href="#derivative">5. Esimene tuletis</a><a href="#critical">6. Kriitilised punktid</a><a href="#monotonicity">7. Kasvamine ja kahanemine</a><a href="#extrema">8. Ekstreemumid</a><a href="#second">9. Teine tuletis</a><a href="#concavity">10. Kumerus ja nõgusus</a><a href="#inflections">11. Käänupunktid</a>
-</nav>
-<div class="theory-content">
-<section class="theory-section" id="domain">
-    <h2>1. Määramispiirkond ja muutumispiirkond</h2>
-    <p>X näitab, milliseid x-väärtusi tohib valemisse panna. Y näitab, milliseid vastuseid võib saada.</p>
-    <ul><li>Jagada nulliga ei tohi.</li><li>Ruutjuure all peab olema arv ≥ 0.</li><li>Logaritmi sees peab olema arv > 0.</li></ul>
-    <p>Y leidmiseks vaata väikseimat ja suurimat väärtust ning seda, millele funktsioon piiride lähedal läheneb.</p>
-    <div class="theory-example"><strong>Näide</strong><div class="math-block" data-latex="f(x)=x^2-4,\quad X=\mathbb{R},\quad Y=[-4;\infty)"></div><p>x võib olla ükskõik milline arv. Kõige väiksem vastus on −4.</p></div>
-    <p class="theory-note">Nurksulg [ ] tähendab, et piir kuulub vahemikku. Ümarsulg ( ) tähendab, et ei kuulu. Kui valid lõigu, uuri ainult selle sisse jäävaid x-väärtusi.</p>
-</section>
-<section class="theory-section" id="parity">
-    <h2>2. Paarsus</h2>
-    <p>Asenda valemis x väärtusega −x. Enne kontrolli, et nii x kui ka −x oleksid lubatud.</p>
-    <ul><li>Kui f(−x) = f(x), on funktsioon paaris: graafik on y-telje suhtes peegelpildis.</li><li>Kui f(−x) = −f(x), on funktsioon paaritu: graafik on alguspunkti suhtes sümmeetriline.</li><li>Kui kumbki võrdus ei kehti, pole funktsioon paaris ega paaritu.</li></ul>
-    <div class="theory-example"><strong>Näide</strong><p>x² on paaris, x³ on paaritu. (x − 1)² ei ole kumbki.</p></div>
-</section>
-<section class="theory-section" id="zeros">
-    <h2>3. Nullkohad</h2>
-    <p>Nullkohas on vastus 0. Graafik puudutab või lõikab seal x-telge.</p>
-    <p>Lahenda f(x) = 0. Jäta alles ainult lubatud x-väärtused, sealhulgas sobivad lõigu otspunktid.</p>
-    <div class="theory-example"><strong>Näide</strong><div class="math-block" data-latex="x^2-4=0\quad\Rightarrow\quad x=-2\ \text{või}\ x=2"></div></div>
-    <p class="theory-note">Murru korral pane lugeja võrduma nulliga; nimetaja ei tohi olla 0. Korrutis on 0, kui vähemalt üks tegur on 0.</p>
-</section>
-<section class="theory-section" id="signs">
-    <h2>4. Positiivsus- ja negatiivsuspiirkond</h2>
-    <p>Positiivne tähendab f(x) > 0: graafik on x-teljest üleval. Negatiivne tähendab f(x) &lt; 0: graafik on allpool.</p>
-    <p>Jaga määramispiirkond nullkohtade ja katkestuste juures osadeks. Proovi igast osast üht x-väärtust ja vaata vastuse märki. Nullkohad ise ei kuulu plussi ega miinuse alla.</p>
-    <div class="theory-example"><strong>Näide</strong><p>x² − 4 on positiivne, kui x &lt; −2 või x > 2. Vahemikus −2 &lt; x &lt; 2 on see negatiivne.</p></div>
-</section>
-<section class="theory-section" id="derivative">
-    <h2>5. Esimene tuletis</h2>
-    <p>Tuletis f′ näitab, kuidas funktsioon muutub. Leia see sobiva reegli järgi.</p>
-    <div class="reference-table-wrap"><table class="reference-table"><thead><tr><th>Funktsioon</th><th>Tuletis</th></tr></thead><tbody>
-        <tr><td class="math" data-latex="c"></td><td class="math" data-latex="0"></td></tr>
-        <tr><td class="math" data-latex="x^n"></td><td class="math" data-latex="nx^{n-1}"></td></tr>
-        <tr><td class="math" data-latex="\sqrt{x}"></td><td class="math" data-latex="\frac{1}{2\sqrt{x}}"></td></tr>
-        <tr><td class="math" data-latex="e^x"></td><td class="math" data-latex="e^x"></td></tr>
-        <tr><td class="math" data-latex="\ln x"></td><td class="math" data-latex="\frac{1}{x}"></td></tr>
-        <tr><td class="math" data-latex="\sin x"></td><td class="math" data-latex="\cos x"></td></tr>
-        <tr><td class="math" data-latex="\cos x"></td><td class="math" data-latex="-\sin x"></td></tr>
-    </tbody></table></div>
-    <p class="theory-note">c on tavaline arv, mis ei sõltu x-ist.</p>
-    <div class="theory-example"><strong>Näide</strong><div class="math-block" data-latex="f(x)=x^2-4\quad\Rightarrow\quad f'(x)=2x"></div></div>
-    <details class="theory-rules"><summary>Summa, korrutise, murru ja liitfunktsiooni reeglid</summary>
-        <p>u ja v tähistavad funktsioone. Liitfunktsioonis arvutad kõigepealt sees oleva avaldise ja siis välise funktsiooni.</p>
-        <div class="math-block" data-latex="(u\pm v)'=u'\pm v'"></div>
-        <div class="math-block" data-latex="(c\cdot u)'=c\cdot u'"></div>
-        <div class="math-block" data-latex="(u\cdot v)'=u'v+uv'"></div>
-        <div class="math-block" data-latex="\left(\frac{u}{v}\right)'=\frac{u'v-uv'}{v^2}"></div>
-        <p>Liitfunktsiooni puhul leia välimise funktsiooni tuletis ja korruta see sisemise funktsiooni tuletisega.</p>
-        <div class="math-block" data-latex="(g(u(x)))'=g'(u(x))\cdot u'(x)"></div>
-        <div class="math-block" data-latex="\left((3x+1)^2\right)'=2(3x+1)\cdot3=6(3x+1)"></div>
-    </details>
-</section>
-<section class="theory-section" id="critical">
-    <h2>6. Kriitilised punktid</h2>
-    <p>Leia määramispiirkonna sees kohad, kus f′(x) = 0 või tuletis puudub, kuid funktsioon ise on olemas.</p>
-    <p>Nimetaja nullkoht ei sobi, kui funktsioon on seal määramata. Vahemiku otspunkte kontrollitakse eraldi.</p>
-    <div class="theory-example"><strong>Näide</strong><div class="math-block" data-latex="f(x)=x^2-4,\quad f'(x)=2x=0\quad\Rightarrow\quad x=0"></div></div>
-</section>
-<section class="theory-section" id="monotonicity">
-    <h2>7. Kasvamis- ja kahanemispiirkond</h2>
-    <p>Vaata esimese tuletise märki: f′ > 0 tähendab kasvamist, f′ &lt; 0 kahanemist.</p>
-    <p>Kontrolli märki kriitiliste punktide vahel. Katkestuse eri pooltel olevaid vahemikke ei tohi ühendada.</p>
-    <div class="theory-example"><strong>Näide</strong><p>x² − 4 kahaneb, kui x &lt; 0, ja kasvab, kui x > 0.</p></div>
-</section>
-<section class="theory-section" id="extrema">
-    <h2>8. Ekstreemumid</h2>
-    <p>Maksimum on kohalik tipp, miinimum kohalik põhi.</p>
-    <ul><li>f′ muudab märki + → −: maksimum.</li><li>f′ muudab märki − → +: miinimum.</li><li>Kui märk ei muutu, pole selles kohas ekstreemumit.</li></ul>
-    <p>Pane leitud x algsesse valemisse, et saada y. Kinnisel lõigul võrdle ka otspunktide väärtusi.</p>
-    <div class="theory-example"><strong>Näide</strong><p>Funktsiooni x² − 4 miinimumpunkt on (0; −4).</p></div>
-</section>
-<section class="theory-section" id="second">
-    <h2>9. Teine tuletis</h2>
-    <p>Leia esimese tuletise tuletis. Kasuta samu reegleid veel kord.</p>
-    <div class="theory-example"><strong>Näide</strong><div class="math-block" data-latex="f(x)=x^2-4\quad\Rightarrow\quad f'(x)=2x\quad\Rightarrow\quad f''(x)=2"></div></div>
-</section>
-<section class="theory-section" id="concavity">
-    <h2>10. Kumerus ja nõgusus</h2>
-    <p>Teise tuletise märk näitab, kumba pidi graafik paindub.</p>
-    <ul><li>f″ > 0: kuju ∪, nõgus.</li><li>f″ &lt; 0: kuju ∩, kumer.</li></ul>
-    <p>Jaga määramispiirkond f″ nullkohtade ja määramata kohtade juures osadeks ning kontrolli igas osas märki.</p>
-    <div class="theory-example"><strong>Näide</strong><p>Funktsioonil x² − 4 on f″ = 2 > 0, seega on graafiku kuju ∪.</p></div>
-</section>
-<section class="theory-section" id="inflections">
-    <h2>11. Käänupunktid</h2>
-    <p>Käänupunktis muutub graafiku paindumise suund: ∪ läheb üle kujuks ∩ või vastupidi.</p>
-    <p>Leia kohad, kus f″ = 0 või f″ puudub. Kontrolli, kas f″ märk muutub. Graafik ei tohi selles kohas katkeda.</p>
-    <p>Ainult f″ = 0 ei ole piisav. Punkti koordinaatide jaoks leia ka y = f(x).</p>
-    <div class="theory-example"><strong>Näide</strong><div class="math-block" data-latex="f(x)=x^3,\quad f''(x)=6x\quad\Rightarrow\quad K(0;0)"></div><p>Vasakul on f″ negatiivne, paremal positiivne. Seega märk muutub.</p></div>
-</section>
-</div></div>
+    <nav class="theory-toc" aria-label="Sisukord">
+        <a href="#domain">1. Määramis- ja muutumispiirkond</a>
+        <a href="#parity">2. Paarsus</a>
+        <a href="#zeros">3. Nullkohad</a>
+        <a href="#signs">4. Märgipiirkonnad</a>
+        <a href="#derivative">5. Esimene tuletis</a>
+        <a href="#critical">6. Kriitilised punktid</a>
+        <a href="#monotonicity">7. Kasvamine ja kahanemine</a>
+        <a href="#extrema">8. Ekstreemumid</a>
+        <a href="#second">9. Teine tuletis</a>
+        <a href="#concavity">10. Kumerus ja nõgusus</a>
+        <a href="#inflections">11. Käänupunktid</a>
+    </nav>
+
+    <div class="theory-content">
+        <section class="theory-section" id="domain">
+            <h2>1. Määramispiirkond ja muutumispiirkond</h2>
+            <p>X näitab, milliseid x-väärtusi tohib valemisse panna. Y näitab, milliseid vastuseid võib saada.</p>
+            <ul>
+                <li>Jagada nulliga ei tohi.</li>
+                <li>Ruutjuure all peab olema arv ≥ 0.</li>
+                <li>Logaritmi sees peab olema arv > 0.</li>
+            </ul>
+            <p>Y leidmiseks vaata väikseimat ja suurimat väärtust ning seda, millele funktsioon piiride lähedal läheneb.</p>
+            <div class="theory-example">
+                <strong>Näide</strong>
+                <div class="math-block" data-latex="f(x)=x^2-4,\quad X=\mathbb{R},\quad Y=[-4;\infty)"></div>
+                <p>x võib olla ükskõik milline arv. Kõige väiksem vastus on −4.</p>
+            </div>
+            <p class="theory-note">Nurksulg [ ] tähendab, et piir kuulub vahemikku. Ümarsulg ( ) tähendab, et ei kuulu. Kui valid lõigu, uuri ainult selle sisse jäävaid x-väärtusi.</p>
+        </section>
+
+        <section class="theory-section" id="parity">
+            <h2>2. Paarsus</h2>
+            <p>Asenda valemis x väärtusega −x. Enne kontrolli, et nii x kui ka −x oleksid lubatud.</p>
+            <ul>
+                <li>Kui f(−x) = f(x), on funktsioon paaris: graafik on y-telje suhtes peegelpildis.</li>
+                <li>Kui f(−x) = −f(x), on funktsioon paaritu: graafik on alguspunkti suhtes sümmeetriline.</li>
+                <li>Kui kumbki võrdus ei kehti, pole funktsioon paaris ega paaritu.</li>
+            </ul>
+            <div class="theory-example">
+                <strong>Näide</strong>
+                <p>x² on paaris, x³ on paaritu. (x − 1)² ei ole kumbki.</p>
+            </div>
+        </section>
+
+        <section class="theory-section" id="zeros">
+            <h2>3. Nullkohad</h2>
+            <p>Nullkohas on vastus 0. Graafik puudutab või lõikab seal x-telge.</p>
+            <p>Lahenda f(x) = 0. Jäta alles ainult lubatud x-väärtused, sealhulgas sobivad lõigu otspunktid.</p>
+            <div class="theory-example">
+                <strong>Näide</strong>
+                <div class="math-block" data-latex="x^2-4=0\quad\Rightarrow\quad x=-2\ \text{või}\ x=2"></div>
+            </div>
+            <p class="theory-note">Murru korral pane lugeja võrduma nulliga; nimetaja ei tohi olla 0. Korrutis on 0, kui vähemalt üks tegur on 0.</p>
+        </section>
+
+        <section class="theory-section" id="signs">
+            <h2>4. Positiivsus- ja negatiivsuspiirkond</h2>
+            <p>Positiivne tähendab f(x) > 0: graafik on x-teljest üleval. Negatiivne tähendab f(x) &lt; 0: graafik on allpool.</p>
+            <p>Jaga määramispiirkond nullkohtade ja katkestuste juures osadeks. Proovi igast osast üht x-väärtust ja vaata vastuse märki. Nullkohad ise ei kuulu plussi ega miinuse alla.</p>
+            <div class="theory-example">
+                <strong>Näide</strong>
+                <p>x² − 4 on positiivne, kui x &lt; −2 või x > 2. Vahemikus −2 &lt; x &lt; 2 on see negatiivne.</p>
+            </div>
+        </section>
+
+        <section class="theory-section" id="derivative">
+            <h2>5. Esimene tuletis</h2>
+            <p>Tuletis f′ näitab, kuidas funktsioon muutub. Leia see sobiva reegli järgi.</p>
+            <div class="reference-table-wrap">
+                <table class="reference-table">
+                    <thead>
+                        <tr>
+                            <th>Funktsioon</th>
+                            <th>Tuletis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="math" data-latex="c"></td>
+                            <td class="math" data-latex="0"></td>
+                        </tr>
+                        <tr>
+                            <td class="math" data-latex="x^n"></td>
+                            <td class="math" data-latex="nx^{n-1}"></td>
+                        </tr>
+                        <tr>
+                            <td class="math" data-latex="\sqrt{x}"></td>
+                            <td class="math" data-latex="\frac{1}{2\sqrt{x}}"></td>
+                        </tr>
+                        <tr>
+                            <td class="math" data-latex="e^x"></td>
+                            <td class="math" data-latex="e^x"></td>
+                        </tr>
+                        <tr>
+                            <td class="math" data-latex="\ln x"></td>
+                            <td class="math" data-latex="\frac{1}{x}"></td>
+                        </tr>
+                        <tr>
+                            <td class="math" data-latex="\sin x"></td>
+                            <td class="math" data-latex="\cos x"></td>
+                        </tr>
+                        <tr>
+                            <td class="math" data-latex="\cos x"></td>
+                            <td class="math" data-latex="-\sin x"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="theory-note">c on tavaline arv, mis ei sõltu x-ist.</p>
+            <div class="theory-example">
+                <strong>Näide</strong>
+                <div class="math-block" data-latex="f(x)=x^2-4\quad\Rightarrow\quad f'(x)=2x"></div>
+            </div>
+            <details class="theory-rules">
+                <summary>Summa, korrutise, murru ja liitfunktsiooni reeglid</summary>
+                <p>u ja v tähistavad funktsioone. Liitfunktsioonis arvutad kõigepealt sees oleva avaldise ja siis välise funktsiooni.</p>
+                <div class="math-block" data-latex="(u\pm v)'=u'\pm v'"></div>
+                <div class="math-block" data-latex="(c\cdot u)'=c\cdot u'"></div>
+                <div class="math-block" data-latex="(u\cdot v)'=u'v+uv'"></div>
+                <div class="math-block" data-latex="\left(\frac{u}{v}\right)'=\frac{u'v-uv'}{v^2}"></div>
+                <p>Liitfunktsiooni puhul leia välimise funktsiooni tuletis ja korruta see sisemise funktsiooni tuletisega.</p>
+                <div class="math-block" data-latex="(g(u(x)))'=g'(u(x))\cdot u'(x)"></div>
+                <div class="math-block" data-latex="\left((3x+1)^2\right)'=2(3x+1)\cdot3=6(3x+1)"></div>
+            </details>
+        </section>
+
+        <section class="theory-section" id="critical">
+            <h2>6. Kriitilised punktid</h2>
+            <p>Leia määramispiirkonna sees kohad, kus f′(x) = 0 või tuletis puudub, kuid funktsioon ise on olemas.</p>
+            <p>Nimetaja nullkoht ei sobi, kui funktsioon on seal määramata. Vahemiku otspunkte kontrollitakse eraldi.</p>
+            <div class="theory-example">
+                <strong>Näide</strong>
+                <div class="math-block" data-latex="f(x)=x^2-4,\quad f'(x)=2x=0\quad\Rightarrow\quad x=0"></div>
+            </div>
+        </section>
+
+        <section class="theory-section" id="monotonicity">
+            <h2>7. Kasvamis- ja kahanemispiirkond</h2>
+            <p>Vaata esimese tuletise märki: f′ > 0 tähendab kasvamist, f′ &lt; 0 kahanemist.</p>
+            <p>Kontrolli märki kriitiliste punktide vahel. Katkestuse eri pooltel olevaid vahemikke ei tohi ühendada.</p>
+            <div class="theory-example">
+                <strong>Näide</strong>
+                <p>x² − 4 kahaneb, kui x &lt; 0, ja kasvab, kui x > 0.</p>
+            </div>
+        </section>
+
+        <section class="theory-section" id="extrema">
+            <h2>8. Ekstreemumid</h2>
+            <p>Maksimum on kohalik tipp, miinimum kohalik põhi.</p>
+            <ul>
+                <li>f′ muudab märki + → −: maksimum.</li>
+                <li>f′ muudab märki − → +: miinimum.</li>
+                <li>Kui märk ei muutu, pole selles kohas ekstreemumit.</li>
+            </ul>
+            <p>Pane leitud x algsesse valemisse, et saada y. Kinnisel lõigul võrdle ka otspunktide väärtusi.</p>
+            <div class="theory-example">
+                <strong>Näide</strong>
+                <p>Funktsiooni x² − 4 miinimumpunkt on (0; −4).</p>
+            </div>
+        </section>
+
+        <section class="theory-section" id="second">
+            <h2>9. Teine tuletis</h2>
+            <p>Leia esimese tuletise tuletis. Kasuta samu reegleid veel kord.</p>
+            <div class="theory-example">
+                <strong>Näide</strong>
+                <div class="math-block" data-latex="f(x)=x^2-4\quad\Rightarrow\quad f'(x)=2x\quad\Rightarrow\quad f''(x)=2"></div>
+            </div>
+        </section>
+
+        <section class="theory-section" id="concavity">
+            <h2>10. Kumerus ja nõgusus</h2>
+            <p>Teise tuletise märk näitab, kumba pidi graafik paindub.</p>
+            <ul>
+                <li>f″ > 0: kuju ∪, nõgus.</li>
+                <li>f″ &lt; 0: kuju ∩, kumer.</li>
+            </ul>
+            <p>Jaga määramispiirkond f″ nullkohtade ja määramata kohtade juures osadeks ning kontrolli igas osas märki.</p>
+            <div class="theory-example">
+                <strong>Näide</strong>
+                <p>Funktsioonil x² − 4 on f″ = 2 > 0, seega on graafiku kuju ∪.</p>
+            </div>
+        </section>
+
+        <section class="theory-section" id="inflections">
+            <h2>11. Käänupunktid</h2>
+            <p>Käänupunktis muutub graafiku paindumise suund: ∪ läheb üle kujuks ∩ või vastupidi.</p>
+            <p>Leia kohad, kus f″ = 0 või f″ puudub. Kontrolli, kas f″ märk muutub. Graafik ei tohi selles kohas katkeda.</p>
+            <p>Ainult f″ = 0 ei ole piisav. Punkti koordinaatide jaoks leia ka y = f(x).</p>
+            <div class="theory-example">
+                <strong>Näide</strong>
+                <div class="math-block" data-latex="f(x)=x^3,\quad f''(x)=6x\quad\Rightarrow\quad K(0;0)"></div>
+                <p>Vasakul on f″ negatiivne, paremal positiivne. Seega märk muutub.</p>
+            </div>
+        </section>
+    </div>
+</div>

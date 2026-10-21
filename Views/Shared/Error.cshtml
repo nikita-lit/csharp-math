@@ -1,4 +1,22 @@
 @model ErrorViewModel
-@{ ViewData["Title"] = "Arvutamine katkes"; }
-<div class="page-heading"><span class="eyebrow">MIDAGI LÄKS VALESTI</span><h1>Proovime uuesti.</h1><p>Päringu töötlemine ei õnnestunud. Ava lahendaja ja proovi uuesti.</p></div>
-<section class="panel content-panel"><a class="button primary" asp-controller="Functions" asp-action="Create">Tagasi lahendajasse →</a>@if (Model.ShowRequestId) { <p style="margin-top:20px">Päringu tunnus: <code>@Model.RequestId</code></p> }</section>
+
+@{
+    ViewData["Title"] = "Arvutamine katkes";
+}
+
+<div class="page-heading">
+    <span class="eyebrow">MIDAGI LÄKS VALESTI</span>
+    <h1>Proovime uuesti.</h1>
+    <p>Päringu töötlemine ei õnnestunud. Ava lahendaja ja proovi uuesti.</p>
+</div>
+
+<section class="panel content-panel">
+    <a class="button primary" asp-controller="Functions" asp-action="Create">Tagasi lahendajasse →</a>
+
+    @if (Model.ShowRequestId)
+    {
+        <p style="margin-top: 20px;">
+            Päringu tunnus: <code>@Model.RequestId</code>
+        </p>
+    }
+</section>

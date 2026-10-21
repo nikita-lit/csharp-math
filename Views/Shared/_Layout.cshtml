@@ -1,4 +1,6 @@
-@{ var action = ViewContext.RouteData.Values["action"]?.ToString(); }
+@{
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+}
 <!DOCTYPE html>
 <html lang="et">
 <head>
@@ -15,28 +17,63 @@
         <nav class="navbar navbar-expand-sm navbar-light border-bottom box-shadow mb-3" aria-label="Põhinavigatsioon">
             <div class="container">
                 <a class="navbar-brand" asp-controller="Functions" asp-action="Create">Function Explorer</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavigation" aria-controls="mainNavigation" aria-expanded="false" aria-label="Ava navigatsioon"><span class="navbar-toggler-icon"></span></button>
+                <button class="navbar-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#mainNavigation"
+                        aria-controls="mainNavigation"
+                        aria-expanded="false"
+                        aria-label="Ava navigatsioon">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
                 <div class="navbar-collapse collapse" id="mainNavigation">
                     <ul class="navbar-nav me-auto">
-                        <li class="nav-item"><a class="nav-link @(action is "Create" or "Edit" or "Details" ? "active" : "")" asp-controller="Functions" asp-action="Create">Kalkulaator</a></li>
-                        <li class="nav-item"><a class="nav-link @(action is "Index" or "Delete" ? "active" : "")" asp-controller="Functions" asp-action="Index">Salvestatud</a></li>
-                        <li class="nav-item"><a class="nav-link @(action == "Theory" ? "active" : "")" asp-controller="Home" asp-action="Theory">Teooria</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link @(action == "Create" || action == "Edit" || action == "Details" ? "active" : "")"
+                               asp-controller="Functions" asp-action="Create">Kalkulaator</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(action == "Index" || action == "Delete" ? "active" : "")"
+                               asp-controller="Functions" asp-action="Index">Salvestatud</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(action == "Theory" ? "active" : "")"
+                               asp-controller="Home" asp-action="Theory">Teooria</a>
+                        </li>
                     </ul>
                 </div>
                 <div class="display-preferences">
-                        <select class="language-select" data-language aria-label="Keel">
-                            <option value="et" lang="et">EST</option>
-                            <option value="ru" lang="ru">RUS</option>
-                        </select>
-                        <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false" aria-label="Tume teema" title="Tume teema">
-                            <svg class="theme-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z" /></svg>
-                        </button>
+                    <select class="language-select" data-language aria-label="Keel">
+                        <option value="et" lang="et">EST</option>
+                        <option value="ru" lang="ru">RUS</option>
+                    </select>
+                    <button type="button"
+                            class="theme-toggle"
+                            data-theme-toggle
+                            aria-pressed="false"
+                            aria-label="Tume teema"
+                            title="Tume teema">
+                        <svg class="theme-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z" />
+                        </svg>
+                    </button>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container app-container"><main id="main-content" role="main" class="pb-4">@RenderBody()</main></div>
-    <footer class="border-top footer text-muted"><div class="container">&copy; 2026 - Function Explorer · <a asp-controller="Home" asp-action="Theory">Teooria</a></div></footer>
+
+    <div class="container app-container">
+        <main id="main-content" role="main" class="pb-4">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2026 - Function Explorer · <a asp-controller="Home" asp-action="Theory">Teooria</a>
+        </div>
+    </footer>
+
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/lib/katex/katex.min.js"></script>
     <script src="~/js/translations.js" asp-append-version="true"></script>

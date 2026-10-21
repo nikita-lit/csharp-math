@@ -1,8 +1,30 @@
 @model FunctionAnalysis
-@{ ViewData["Title"] = "Funktsiooni uurimine"; }
-<div class="page-heading detail-heading"><div><a class="breadcrumb" asp-action="Index">← Salvestatud funktsioonid</a><h1 class="math" data-latex="f(x) = @Model.FormulaLatex">f(x) = @Model.Formula</h1><p>Uurimine #@Model.Id @TimeZoneInfo.ConvertTimeFromUtc(
-                                                                                                                                                                                    DateTime.SpecifyKind(Model.CreatedAt, DateTimeKind.Utc),
-                                                                                                                                                                                    TimeZoneInfo.FindSystemTimeZoneById("Europe/Tallinn")
-                                                                                                                                                                                ).ToString("dd.MM.yyyy HH:mm") @(Model.UpdatedAt.HasValue ? $"· Muudetud {Model.UpdatedAt:dd.MM.yyyy HH:mm}" : "")</p></div><div class="heading-actions"><a class="button secondary" asp-action="Edit" asp-route-id="@Model.Id">Muuda ✎</a><a class="button quiet danger-text" asp-action="Delete" asp-route-id="@Model.Id">Kustuta</a></div></div>
+
+@{
+    ViewData["Title"] = "Funktsiooni uurimine";
+    var createdAt = TimeZoneInfo.ConvertTimeFromUtc(
+        DateTime.SpecifyKind(Model.CreatedAt, DateTimeKind.Utc),
+        TimeZoneInfo.FindSystemTimeZoneById("Europe/Tallinn"));
+    var updatedLabel = Model.UpdatedAt.HasValue
+        ? $"· Muudetud {Model.UpdatedAt:dd.MM.yyyy HH:mm}"
+        : string.Empty;
+}
+
+<div class="page-heading detail-heading">
+    <div>
+        <a class="breadcrumb" asp-action="Index">← Salvestatud funktsioonid</a>
+        <h1 class="math" data-latex="f(x) = @Model.FormulaLatex">f(x) = @Model.Formula</h1>
+        <p>Uurimine #@Model.Id @createdAt.ToString("dd.MM.yyyy HH:mm") @updatedLabel</p>
+    </div>
+    <div class="heading-actions">
+        <a class="button secondary" asp-action="Edit" asp-route-id="@Model.Id">Muuda ✎</a>
+        <a class="button quiet danger-text" asp-action="Delete" asp-route-id="@Model.Id">Kustuta</a>
+    </div>
+</div>
+
 <partial name="_Workspace" model="Model" />
-@section Scripts { <script src="~/js/function-graph.js" asp-append-version="true"></script> }
+
+@section Scripts
+{
+    <script src="~/js/function-graph.js" asp-append-version="true"></script>
+}

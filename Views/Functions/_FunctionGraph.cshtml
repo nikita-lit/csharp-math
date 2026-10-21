@@ -1,7 +1,19 @@
 @model string
+
 <section class="panel function-graph">
-    <div class="panel-heading"><h2>Funktsiooni graafik</h2></div>
-    <div class="graph-canvas-wrapper"><canvas id="functionChart" role="img" aria-label="Funktsiooni graafik"></canvas><div class="graph-empty"><span>ƒ(x)</span><p>Sisesta funktsiooni valem.</p></div><div class="graph-tooltip" hidden></div></div>
+    <div class="panel-heading">
+        <h2>Funktsiooni graafik</h2>
+    </div>
+
+    <div class="graph-canvas-wrapper">
+        <canvas id="functionChart" role="img" aria-label="Funktsiooni graafik"></canvas>
+        <div class="graph-empty">
+            <span>ƒ(x)</span>
+            <p>Sisesta funktsiooni valem.</p>
+        </div>
+        <div class="graph-tooltip" hidden></div>
+    </div>
+
     <div class="graph-error error-message" role="alert" hidden></div>
     <p class="graph-footer">Graafikul on märgitud nullkohad, ekstreemumid ja käänupunktid.</p>
 </section>

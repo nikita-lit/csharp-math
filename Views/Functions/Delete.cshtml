@@ -1,7 +1,26 @@
 @model FunctionAnalysis
-@{ ViewData["Title"] = "Kustuta uurimine"; }
-<div class="page-heading"><a class="breadcrumb" asp-action="Details" asp-route-id="@Model.Id">← Tagasi uurimise juurde</a><h1>Kustuta see uurimine?</h1><p>Salvestatud valem ja selle tulemused eemaldatakse sinu kogust.</p></div>
-<section class="panel delete-panel"><div class="delete-symbol">×</div><h2 class="math" data-latex="f(x) = @Model.FormulaLatex">f(x) = @Model.Formula</h2><p>Uurimine #@Model.Id @TimeZoneInfo.ConvertTimeFromUtc(
-                                                                                                                                                                                    DateTime.SpecifyKind(Model.CreatedAt, DateTimeKind.Utc),
-                                                                                                                                                                                    TimeZoneInfo.FindSystemTimeZoneById("Europe/Tallinn")
-                                                                                                                                                                                ).ToString("dd.MM.yyyy HH:mm")</p><form asp-action="Delete" method="post"><input type="hidden" asp-for="Id" /><button type="submit" class="button danger">Kustuta uurimine</button><a class="button secondary" asp-action="Index">Tagasi</a></form></section>
+
+@{
+    ViewData["Title"] = "Kustuta uurimine";
+    var createdAt = TimeZoneInfo.ConvertTimeFromUtc(
+        DateTime.SpecifyKind(Model.CreatedAt, DateTimeKind.Utc),
+        TimeZoneInfo.FindSystemTimeZoneById("Europe/Tallinn"));
+}
+
+<div class="page-heading">
+    <a class="breadcrumb" asp-action="Details" asp-route-id="@Model.Id">← Tagasi uurimise juurde</a>
+    <h1>Kustuta see uurimine?</h1>
+    <p>Salvestatud valem ja selle tulemused eemaldatakse sinu kogust.</p>
+</div>
+
+<section class="panel delete-panel">
+    <div class="delete-symbol">×</div>
+    <h2 class="math" data-latex="f(x) = @Model.FormulaLatex">f(x) = @Model.Formula</h2>
+    <p>Uurimine #@Model.Id @createdAt.ToString("dd.MM.yyyy HH:mm")</p>
+
+    <form asp-action="Delete" method="post">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="button danger">Kustuta uurimine</button>
+        <a class="button secondary" asp-action="Index">Tagasi</a>
+    </form>
+</section>

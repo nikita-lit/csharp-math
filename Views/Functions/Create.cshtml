@@ -1,14 +1,31 @@
 @model FunctionInputModel
-@{ ViewData["Title"] = "Kalkulaator"; }
+
+@{
+    ViewData["Title"] = "Kalkulaator";
+    var workspaceModel = new FunctionAnalysis
+    {
+        Formula = Model.Formula,
+        RangeFrom = Model.RangeFrom,
+        RangeTo = Model.RangeTo,
+        RestrictDomain = Model.RestrictDomain
+    };
+}
+
 <div class="calculator-page">
-    <div class="page-heading"><h1>Funktsiooni kalkulaator</h1><p>Sisesta valem ja vaata tulemusi koos lahenduskäiguga allpool.</p></div>
+    <div class="page-heading">
+        <h1>Funktsiooni kalkulaator</h1>
+        <p>Sisesta valem ja vaata tulemusi koos lahenduskäiguga allpool.</p>
+    </div>
+
     <form id="analysisForm" asp-action="Create" method="post" class="analysis-form">
         <partial name="_FunctionForm" model="Model" />
     </form>
-    <partial name="_Workspace" model="@(new FunctionAnalysis { Formula = Model.Formula, RangeFrom = Model.RangeFrom, RangeTo = Model.RangeTo, RestrictDomain = Model.RestrictDomain })" />
 
+    <partial name="_Workspace" model="workspaceModel" />
 </div>
-@section Scripts {
+
+@section Scripts
+{
     <script src="~/js/formula-calculator.js" asp-append-version="true"></script>
     <script src="~/js/function-graph.js" asp-append-version="true"></script>
 }

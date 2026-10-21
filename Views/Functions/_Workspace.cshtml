@@ -1,17 +1,41 @@
 @model FunctionAnalysis
-@{ var preview = Model.Id == 0; }
-<div class="workspace" data-formula="@Model.Formula" data-from="@Model.RangeFrom" data-to="@Model.RangeTo" data-restrict-domain="@Model.RestrictDomain.ToString().ToLowerInvariant()" data-preview="@(preview ? "true" : "false")">
+
+@{
+    var preview = Model.Id == 0;
+    var analysisNote = Model.IsNumerical
+        ? "Osa tulemusi on leitud numbriliselt valitud vahemikus."
+        : preview
+            ? "Sisesta valem, et näha funktsiooni omadusi."
+            : "Tulemused kehtivad näidatud määramispiirkonnas.";
+}
+
+<div class="workspace"
+     data-formula="@Model.Formula"
+     data-from="@Model.RangeFrom"
+     data-to="@Model.RangeTo"
+     data-restrict-domain="@Model.RestrictDomain.ToString().ToLowerInvariant()"
+     data-preview="@(preview ? "true" : "false")">
     <div class="workspace-status" role="status" aria-live="polite"></div>
+
     <section id="resultsSection" class="panel results-section solution-panel" aria-labelledby="resultsHeading">
         <div class="section-heading">
-            <div><h2 id="resultsHeading">Tulemused ja lahenduskäik</h2><p>Iga omaduse vastus koos arvutuste ja selgitustega.</p></div>
-            @if (!preview) { <span class="tag">Salvestatud</span> }
+            <div>
+                <h2 id="resultsHeading">Tulemused ja lahenduskäik</h2>
+                <p>Iga omaduse vastus koos arvutuste ja selgitustega.</p>
+            </div>
+            @if (!preview)
+            {
+                <span class="tag">Salvestatud</span>
+            }
         </div>
+
         <div class="results-layout">
             <partial name="_FunctionGraph" model="Model.Formula" />
             <div class="results-properties">
-                <div class="solution-content" aria-live="polite"><p class="solution-placeholder">Lahenduskäik ilmub pärast funktsiooni arvutamist.</p></div>
-                <p class="analysis-note">@(Model.IsNumerical ? "Osa tulemusi on leitud numbriliselt valitud vahemikus." : preview ? "Sisesta valem, et näha funktsiooni omadusi." : "Tulemused kehtivad näidatud määramispiirkonnas.")</p>
+                <div class="solution-content" aria-live="polite">
+                    <p class="solution-placeholder">Lahenduskäik ilmub pärast funktsiooni arvutamist.</p>
+                </div>
+                <p class="analysis-note">@analysisNote</p>
             </div>
         </div>
     </section>
